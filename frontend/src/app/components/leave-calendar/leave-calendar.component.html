@@ -1,0 +1,65 @@
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h2 class="page__title">Leave calendar</h2>
+      <p class="page__sub">Monthly view of approved and pending leave ranges (all requests).</p>
+    </div>
+    <div class="cal-nav">
+      <p-button icon="pi pi-chevron-left" [rounded]="true" [text]="true" (onClick)="prevMonth()" aria-label="Previous month" />
+      <span class="cal-nav__title">{{ monthTitle() }}</span>
+      <p-button icon="pi pi-chevron-right" [rounded]="true" [text]="true" (onClick)="nextMonth()" aria-label="Next month" />
+    </div>
+  </div>
+
+  <div class="cal-filters">
+    <p-select
+      [options]="teamOptions"
+      optionLabel="label"
+      optionValue="value"
+      [(ngModel)]="teamFilterId"
+      placeholder="All teams"
+      [showClear]="true"
+      [style]="{ minWidth: '220px' }"
+    />
+    <label class="cal-approved">
+      <input type="checkbox" [(ngModel)]="approvedOnly" />
+      <span>Approved only</span>
+    </label>
+  </div>
+
+  <p-card>
+    @if (loading) {
+      <div class="page__loading">
+        <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+      </div>
+    } @else {
+      <div class="cal-grid">
+        <div class="cal-row cal-row--head">
+          @for (w of weekLabels; track w) {
+            <div class="cal-cell cal-cell--head">{{ w }}</div>
+          }
+        </div>
+        @for (row of cellRows(); track $index) {
+          <div class="cal-row">
+            @for (c of row; track $index) {
+              <div class="cal-cell" [class.cal-cell--muted]="!c.inMonth">
+                <div class="cal-day">{{ c.inMonth ? c.dayNum : '' }}</div>
+                @for (l of c.leaves; track l.id) {
+                  <div
+                    class="cal-chip"
+                    [class.cal-chip--pending]="l.status === 'PENDING'"
+                    [class.cal-chip--approved]="l.status === 'APPROVED'"
+                    [class.cal-chip--rejected]="l.status === 'REJECTED'"
+                    [title]="(l.employee?.fullName || l.employee?.username || '') + ' · ' + (l.status ?? '')"
+                  >
+                    {{ l.employee?.fullName || l.employee?.username || 'Leave' }}
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </p-card>
+</div>

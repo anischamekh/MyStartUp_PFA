@@ -1,0 +1,48 @@
+<section class="chatbot-page">
+  <header class="chatbot-header">
+    <h1>MyStartUp AI Assistant</h1>
+    <p>Ask questions using your real HR and project data.</p>
+  </header>
+
+  @if (suggestions().length) {
+    <div class="chatbot-suggestions">
+      @for (s of suggestions(); track s) {
+        <button type="button" class="chip" (click)="useSuggestion(s)" [disabled]="loading()">
+          {{ s }}
+        </button>
+      }
+    </div>
+  }
+
+  <div class="chatbot-messages">
+    @for (m of messages(); track m.id) {
+      <div class="chat-row" [class.chat-row--user]="m.fromUser">
+        <div class="chat-bubble">
+          {{ m.content }}
+        </div>
+      </div>
+    }
+    @if (loading()) {
+      <div class="chat-loading">
+        <p-progressSpinner styleClass="chat-spinner" strokeWidth="4" />
+        <span>Thinking...</span>
+      </div>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="chat-error">{{ error() }}</p>
+  }
+
+  <form class="chatbot-input" (ngSubmit)="send()">
+    <input
+      pInputText
+      [ngModel]="question()"
+      (ngModelChange)="question.set($event)"
+      name="question"
+      placeholder="Ask about leaves, tasks, projects, payroll..."
+      [disabled]="loading()"
+    />
+    <button pButton type="submit" label="Send" [disabled]="loading() || !question().trim()"></button>
+  </form>
+</section>

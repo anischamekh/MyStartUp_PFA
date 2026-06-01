@@ -1,0 +1,175 @@
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h2 class="page__title">Projects</h2>
+      <p class="page__sub">
+        @if (readOnly) {
+          View all projects (read-only).
+        } @else {
+          Create projects, set deadlines, and assign one or more teams. Team leaders are notified when assigned.
+        }
+      </p>
+    </div>
+    @if (!readOnly) {
+      <p-button label="New project" icon="pi pi-plus" severity="info" (onClick)="openNew()" />
+    }
+  </div>
+
+  <p-card>
+    @if (loading) {
+      <div class="page__loading">
+        <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+      </div>
+    } @else {
+      <p-table
+        #dt
+        [value]="projects"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [globalFilterFields]="['name', 'description', 'status', 'startDate', 'endDate', 'teamSearch', 'leaderSearch']"
+        sortMode="single"
+        dataKey="id"
+        [tableStyle]="{ 'min-width': '56rem' }"
+      >
+        <ng-template pTemplate="caption">
+          <div class="table-caption">
+            <p-iconfield iconPosition="left">
+              <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+              <input
+                pInputText
+                type="text"
+                (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                placeholder="Search projects…"
+              />
+            </p-iconfield>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="name">Name <p-sortIcon field="name" /></th>
+            <th>Teams</th>
+            <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
+            <th pSortableColumn="progress">Progress <p-sortIcon field="progress" /></th>
+            <th pSortableColumn="startDate">Start <p-sortIcon field="startDate" /></th>
+            <th pSortableColumn="endDate">End <p-sortIcon field="endDate" /></th>
+            @if (!readOnly) {
+              <th style="width: 5rem">Actions</th>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-p>
+          <tr>
+            <td>
+              <div class="cell-title">{{ p.name }}</div>
+              @if (p.description) {
+                <div class="cell-muted">{{ p.description }}</div>
+              }
+            </td>
+            <td>{{ teamLabels(p) }}</td>
+            <td>{{ p.status }}</td>
+            <td>{{ p.progress ?? 0 }}%</td>
+            <td>{{ p.startDate }}</td>
+            <td>{{ p.endDate }}</td>
+            @if (!readOnly) {
+              <td>
+                <p-button
+                  icon="pi pi-pencil"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="warn"
+                  (onClick)="edit(p)"
+                  aria-label="Edit"
+                />
+              </td>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [attr.colspan]="readOnly ? 6 : 7">No projects yet.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>
+
+<p-dialog
+  [header]="editingId ? 'Edit project' : 'New project'"
+  [(visible)]="modalOpen"
+  [modal]="true"
+  [style]="{ width: 'min(640px, 95vw)' }"
+  [draggable]="false"
+>
+  <div class="dialog-fields">
+    <div class="span-2">
+      <label class="field-label" for="proj-name">Name</label>
+      <input id="proj-name" pInputText class="w-full" [(ngModel)]="form.name" required />
+    </div>
+    <div class="span-2">
+      <label class="field-label" for="proj-desc">Description</label>
+      <textarea id="proj-desc" pTextarea rows="3" class="w-full" [(ngModel)]="form.description"></textarea>
+    </div>
+    <div>
+      <label class="field-label" for="proj-status">Status</label>
+      <p-select
+        inputId="proj-status"
+        [options]="statusOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="form.status"
+        placeholder="Status"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+    <div>
+      <label class="field-label" for="proj-progress">Progress (%)</label>
+      <p-inputNumber
+        inputId="proj-progress"
+        [(ngModel)]="form.progress"
+        [min]="0"
+        [max]="100"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+    <div>
+      <label class="field-label" for="proj-start">Start</label>
+      <p-datepicker
+        inputId="proj-start"
+        [(ngModel)]="startDateModel"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+    <div>
+      <label class="field-label" for="proj-end">End</label>
+      <p-datepicker
+        inputId="proj-end"
+        [(ngModel)]="endDateModel"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+    <div class="span-2">
+      <label class="field-label" for="proj-teams">Teams</label>
+      <p-multiselect
+        inputId="proj-teams"
+        [options]="teamOptions"
+        [(ngModel)]="selectedTeams"
+        optionLabel="name"
+        placeholder="Select one or more teams"
+        display="chip"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="modalOpen = false" />
+    <p-button label="Save" icon="pi pi-check" severity="success" (onClick)="save()" />
+  </ng-template>
+</p-dialog>

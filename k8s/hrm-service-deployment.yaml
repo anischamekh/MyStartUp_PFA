@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hrm-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hrm-service
+  template:
+    metadata:
+      labels:
+        app: hrm-service
+    spec:
+      containers:
+        - name: hrm-service
+          image: mystartup/hrm-service:latest
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: mystartup-config
+            - secretRef:
+                name: mystartup-secrets
+          env:
+            - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/hrm_db
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hrm-service
+spec:
+  selector:
+    app: hrm-service
+  ports:
+    - port: 8082
+      targetPort: 8082

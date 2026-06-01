@@ -1,0 +1,106 @@
+<div class="chat-widget" aria-live="polite">
+  @if (open()) {
+    <div
+      class="chat-popup chat-popup--open"
+      role="dialog"
+      aria-label="MyStartUp AI Assistant"
+    >
+      <header class="chat-popup__header">
+        <div class="chat-popup__title">
+          <span class="chat-popup__icon" aria-hidden="true">
+            <i class="pi pi-sparkles"></i>
+          </span>
+          <div>
+            <strong>MyStartUp AI</strong>
+            <span class="chat-popup__subtitle">Assistant</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="chat-popup__close"
+          (click)="close()"
+          aria-label="Close chat"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </header>
+
+      @if (suggestions().length) {
+        <div class="chat-popup__suggestions">
+          @for (s of suggestions(); track s) {
+            <button
+              type="button"
+              class="chat-chip"
+              (click)="useSuggestion(s)"
+              [disabled]="loading()"
+            >
+              {{ s }}
+            </button>
+          }
+        </div>
+      }
+
+      <div class="chat-popup__body" #messagesEl>
+        @for (m of messages(); track m.id) {
+          <div class="chat-msg" [class.chat-msg--user]="m.fromUser" [class.chat-msg--ai]="!m.fromUser">
+            <div class="chat-msg__bubble">
+              <p class="chat-msg__text">{{ m.content }}</p>
+              <time class="chat-msg__time">{{ formatTime(m.createdAt) }}</time>
+            </div>
+          </div>
+        }
+
+        @if (loading()) {
+          <div class="chat-msg chat-msg--ai chat-msg--typing">
+            <div class="chat-msg__bubble chat-msg__bubble--typing">
+              <span class="chat-typing-label">AI is typing...</span>
+              <span class="chat-typing-dots" aria-hidden="true">
+                <span></span><span></span><span></span>
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (error()) {
+        <p class="chat-popup__error" role="alert">{{ error() }}</p>
+      }
+
+      <footer class="chat-popup__footer">
+        <textarea
+          class="chat-popup__input"
+          [ngModel]="question()"
+          (ngModelChange)="question.set($event)"
+          (keydown)="onInputKeydown($event)"
+          name="chatQuestion"
+          rows="2"
+          placeholder="Type a message..."
+          [disabled]="loading()"
+          aria-label="Message input"
+        ></textarea>
+        <button
+          type="button"
+          class="chat-popup__send"
+          (click)="send()"
+          [disabled]="loading() || !question().trim()"
+          aria-label="Send message"
+        >
+          <i class="pi pi-send"></i>
+        </button>
+      </footer>
+    </div>
+  }
+
+  <button
+    type="button"
+    class="chat-fab"
+    (click)="toggleOpen()"
+    [attr.aria-expanded]="open()"
+    aria-label="Open AI assistant"
+  >
+    @if (unreadCount() > 0 && !open()) {
+      <span class="chat-fab__badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+    }
+    <i class="pi" [class.pi-times]="open()" [class.pi-comments]="!open()"></i>
+  </button>
+</div>

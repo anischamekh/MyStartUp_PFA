@@ -1,0 +1,79 @@
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h2 class="page__title">Documents</h2>
+      <p class="page__sub">Upload and manage employee files. HR sees all documents; others see their own.</p>
+    </div>
+    <p-button label="Upload" icon="pi pi-upload" severity="success" (onClick)="openUpload()" />
+  </div>
+
+  <p-card>
+    @if (loading) {
+      <div class="page__loading">
+        <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+      </div>
+    } @else {
+      <p-table [value]="docs" [paginator]="true" [rows]="10" dataKey="id" [tableStyle]="{ 'min-width': '48rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Employee</th>
+            <th>Type</th>
+            <th>Uploaded</th>
+            <th style="width: 10rem">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-d>
+          <tr>
+            <td>{{ d.name }}</td>
+            <td>{{ d.user?.fullName || d.user?.username }}</td>
+            <td>{{ d.type || '—' }}</td>
+            <td>{{ d.uploadDate | date: 'short' }}</td>
+            <td>
+              <p-button icon="pi pi-download" [rounded]="true" [text]="true" severity="success" (onClick)="download(d)" />
+              <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="remove(d)" />
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5">No documents.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>
+
+<p-dialog header="Upload document" [(visible)]="uploadOpen" [modal]="true" [style]="{ width: 'min(480px, 95vw)' }">
+  <div class="dialog-fields dialog-fields--single">
+    <div>
+      <label class="field-label">Employee</label>
+      <p-select
+        [options]="userOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="uploadUserId"
+        placeholder="User"
+        [style]="{ width: '100%' }"
+        [disabled]="!isHr"
+      />
+    </div>
+    <div>
+      <label class="field-label">Display name (optional)</label>
+      <input pInputText class="w-full" [(ngModel)]="uploadName" />
+    </div>
+    <div>
+      <label class="field-label">Type (optional)</label>
+      <input pInputText class="w-full" [(ngModel)]="uploadType" placeholder="e.g. CONTRACT" />
+    </div>
+    <div class="span-2">
+      <label class="field-label">File</label>
+      <input type="file" class="w-full" (change)="onNativeFile($event)" />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="danger" [text]="true" (onClick)="uploadOpen = false" />
+    <p-button label="Upload" icon="pi pi-check" severity="success" (onClick)="submitUpload()" />
+  </ng-template>
+</p-dialog>

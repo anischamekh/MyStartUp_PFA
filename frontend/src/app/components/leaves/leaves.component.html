@@ -1,0 +1,229 @@
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h2 class="page__title">Leave requests</h2>
+      <p class="page__sub">
+        @if (isApprover) {
+          Review and approve time away. HR and managers see all pending requests.
+        } @else {
+          Request time off — balances are enforced automatically.
+        }
+      </p>
+    </div>
+    <div class="page__actions">
+      @if (canRequestLeave) {
+        <p-button label="Request leave" icon="pi pi-calendar-plus" severity="success" (onClick)="openNew()" />
+      }
+      <p-button label="Refresh" icon="pi pi-refresh" severity="info" [outlined]="true" (onClick)="reload()" />
+    </div>
+  </div>
+
+  <p-card>
+    @if (loading) {
+      <div class="page__loading">
+        <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+      </div>
+    } @else {
+      <p-table
+        #dt
+        [value]="leaves"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [globalFilterFields]="['status', 'startDate', 'endDate', 'reason', 'employeeName', 'leaveType']"
+        sortMode="single"
+        dataKey="id"
+        [tableStyle]="{ 'min-width': '56rem' }"
+      >
+        <ng-template pTemplate="caption">
+          <div class="table-caption table-caption--stack">
+            @if (canViewUserHistory) {
+              <p-select
+                [options]="historyUserOptions"
+                optionLabel="label"
+                optionValue="value"
+                [(ngModel)]="historyUserId"
+                placeholder="Employee history (HR / Manager)"
+                [showClear]="true"
+                [style]="{ minWidth: '220px' }"
+                (ngModelChange)="loadHistoryForUser()"
+              />
+            }
+            <p-iconfield iconPosition="left">
+              <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+              <input
+                pInputText
+                type="text"
+                (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                placeholder="Search employee, dates, status…"
+              />
+            </p-iconfield>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Employee</th>
+            <th>Type</th>
+            <th pSortableColumn="startDate">Start <p-sortIcon field="startDate" /></th>
+            <th pSortableColumn="endDate">End <p-sortIcon field="endDate" /></th>
+            <th pSortableColumn="days">Days <p-sortIcon field="days" /></th>
+            <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
+            <th style="width: 14rem">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-l>
+          <tr>
+            <td class="cell-title">{{ l.employee?.fullName || l.employee?.username }}</td>
+            <td>{{ l.leaveType || 'ANNUAL' }}</td>
+            <td>{{ l.startDate }}</td>
+            <td>{{ l.endDate }}</td>
+            <td class="tabular">{{ l.days }}</td>
+            <td>
+              <p-tag [value]="l.status" [severity]="statusSeverity(l.status)" />
+            </td>
+            <td>
+              @if (isApprover && l.status === 'PENDING') {
+                <p-button
+                  label="Approve"
+                  icon="pi pi-check"
+                  severity="success"
+                  [rounded]="true"
+                  size="small"
+                  (onClick)="confirmApprove(l)"
+                />
+                <p-button
+                  label="Reject"
+                  icon="pi pi-times"
+                  severity="danger"
+                  [rounded]="true"
+                  size="small"
+                  (onClick)="confirmReject(l)"
+                />
+              } @else if (l.status === 'PENDING') {
+                <span class="cell-muted">Awaiting review</span>
+              } @else {
+                <span class="cell-muted">—</span>
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7">No leave requests yet.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+
+  <p-card styleClass="leave-calendar-card">
+    <h3 class="calendar-card-title">My leave — calendar</h3>
+    <p class="calendar-card-hint">Browse the month; approved blocks are listed below.</p>
+    <div class="calendar-row">
+      <p-datepicker [(ngModel)]="calendarMonth" [inline]="true" dateFormat="yy-mm-dd" />
+      <div class="calendar-side">
+        <div class="calendar-side__title">Approved periods</div>
+        @if (approvedBlocksMine().length === 0) {
+          <p class="cell-muted">No approved leave yet.</p>
+        } @else {
+          <ul class="leave-blocks">
+            @for (b of approvedBlocksMine(); track b.start + b.end) {
+              <li>{{ b.start }} → {{ b.end }} @if (b.days) { ({{ b.days }} days) }</li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  </p-card>
+</div>
+
+<p-dialog
+  header="Request leave"
+  [(visible)]="requestModalOpen"
+  [modal]="true"
+  [style]="{ width: 'min(560px, 95vw)' }"
+  [draggable]="false"
+  (onHide)="closeRequestModal()"
+>
+  <div class="dialog-fields">
+    <div>
+      <label class="field-label" for="leave-type">Type</label>
+      <p-select
+        inputId="leave-type"
+        [options]="leaveTypeOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="selectedLeaveType"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+    <div>
+      <label class="field-label" for="leave-start">Start date</label>
+      <p-datepicker
+        inputId="leave-start"
+        [(ngModel)]="startDateModel"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+    <div>
+      <label class="field-label" for="leave-end">End date</label>
+      <p-datepicker
+        inputId="leave-end"
+        [(ngModel)]="endDateModel"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+    <div class="span-2">
+      <label class="field-label" for="leave-mgr">Manager (optional)</label>
+      <p-select
+        inputId="leave-mgr"
+        [options]="managerOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="selectedManagerId"
+        placeholder="Manager"
+        [showClear]="true"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+    <div class="span-2">
+      <label class="field-label" for="leave-reason">Reason</label>
+      <textarea id="leave-reason" pTextarea [(ngModel)]="form.reason" rows="3" class="w-full"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" severity="danger" [outlined]="true" (onClick)="closeRequestModal()" />
+    <p-button label="Submit" icon="pi pi-send" severity="success" (onClick)="submit()" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [header]="confirmKind === 'approve' ? 'Approve leave' : 'Reject leave'"
+  [(visible)]="confirmModalOpen"
+  [modal]="true"
+  [style]="{ width: 'min(420px, 95vw)' }"
+  [draggable]="false"
+  (onHide)="closeConfirmModal()"
+>
+  <p>
+    @if (confirmKind === 'approve') {
+      Approve this leave request?
+    } @else {
+      Reject this leave request?
+    }
+  </p>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="closeConfirmModal()" />
+    @if (confirmKind === 'approve') {
+      <p-button label="Approve" icon="pi pi-check" severity="success" (onClick)="confirmAction()" />
+    } @else {
+      <p-button label="Reject" icon="pi pi-times" severity="danger" (onClick)="confirmAction()" />
+    }
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500">
+  <rect width="960" height="500" fill="#f8fafc"/>
+  <text x="480" y="30" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="bold">Leave Approval Sequence</text>
+  <text x="80" y="70" font-size="12">Frontend</text>
+  <text x="200" y="70" font-size="12">Gateway</text>
+  <text x="340" y="70" font-size="12">HRM</text>
+  <text x="500" y="70" font-size="12">Kafka</text>
+  <text x="660" y="70" font-size="12">Auth</text>
+  <line x1="80" y1="85" x2="80" y2="460" stroke="#94a3b8"/>
+  <line x1="200" y1="85" x2="200" y2="460" stroke="#94a3b8"/>
+  <line x1="340" y1="85" x2="340" y2="460" stroke="#94a3b8"/>
+  <line x1="500" y1="85" x2="500" y2="460" stroke="#94a3b8"/>
+  <line x1="660" y1="85" x2="660" y2="460" stroke="#94a3b8"/>
+  <line x1="80" y1="120" x2="200" y2="140" stroke="#2563eb"/><text x="110" y="115" font-size="10">POST /api/leaves/{id}/approve</text>
+  <line x1="200" y1="150" x2="340" y2="170" stroke="#2563eb"/><text x="230" y="145" font-size="10">JWT validated</text>
+  <line x1="340" y1="200" x2="660" y2="220" stroke="#16a34a"/><text x="420" y="195" font-size="10">Feign user summary</text>
+  <line x1="340" y1="260" x2="500" y2="280" stroke="#d97706"/><text x="380" y="255" font-size="10">LeaveApprovedEvent</text>
+  <line x1="500" y1="320" x2="340" y2="340" stroke="#d97706"/><text x="380" y="315" font-size="10">NotificationEvent</text>
+  <line x1="340" y1="380" x2="80" y2="400" stroke="#2563eb"/><text x="120" y="375" font-size="10">200 OK</text>
+</svg>

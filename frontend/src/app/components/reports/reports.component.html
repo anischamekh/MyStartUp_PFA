@@ -1,0 +1,70 @@
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h2 class="page__title">Reports</h2>
+      <p class="page__sub">Task, team, and leave statistics. Export for sharing.</p>
+    </div>
+    <div class="page__actions">
+      <p-button label="PDF" icon="pi pi-file-pdf" severity="danger" [outlined]="true" (onClick)="downloadPdf()" />
+      <p-button label="Excel" icon="pi pi-file-excel" severity="success" [outlined]="true" (onClick)="downloadExcel()" />
+      <p-button label="CSV" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="exportCsv()" />
+      <p-button label="Refresh" icon="pi pi-refresh" severity="info" [outlined]="true" (onClick)="reload()" />
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="page__loading">
+      <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+    </div>
+  } @else if (summary) {
+    <div class="reports-grid">
+      <p-card header="Tasks by status">
+        <div class="chart-panel">
+          <div class="chart-bars">
+            @for (row of rows(summary.tasksByStatus, maxVal(summary.tasksByStatus)); track row.key) {
+              <div class="chart-bar-row">
+                <span class="chart-bar-row__label">{{ row.key }}</span>
+                <div class="chart-bar-track">
+                  <div class="chart-bar-fill chart-bar-fill--1" [style.width.%]="row.pct"></div>
+                </div>
+                <span class="chart-bar-row__count">{{ row.count }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </p-card>
+
+      <p-card header="Employees per team">
+        <div class="chart-panel">
+          <div class="chart-bars">
+            @for (row of rows(summary.employeesByTeam, maxVal(summary.employeesByTeam)); track row.key) {
+              <div class="chart-bar-row">
+                <span class="chart-bar-row__label">{{ row.key }}</span>
+                <div class="chart-bar-track">
+                  <div class="chart-bar-fill chart-bar-fill--2" [style.width.%]="row.pct"></div>
+                </div>
+                <span class="chart-bar-row__count">{{ row.count }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </p-card>
+
+      <p-card header="Leaves by status">
+        <div class="chart-panel">
+          <div class="chart-bars">
+            @for (row of rows(summary.leavesByStatus, maxVal(summary.leavesByStatus)); track row.key) {
+              <div class="chart-bar-row">
+                <span class="chart-bar-row__label">{{ row.key }}</span>
+                <div class="chart-bar-track">
+                  <div class="chart-bar-fill chart-bar-fill--3" [style.width.%]="row.pct"></div>
+                </div>
+                <span class="chart-bar-row__count">{{ row.count }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </p-card>
+    </div>
+  }
+</div>

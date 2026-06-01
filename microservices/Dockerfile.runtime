@@ -1,0 +1,20 @@
+# Builds the service JAR inside Docker so "docker compose build" always picks up source changes.
+ARG SERVICE=auth-service
+FROM maven:3.9-eclipse-temurin-17-alpine AS builder
+ARG SERVICE
+WORKDIR /src
+COPY pom.xml .
+COPY common-lib ./common-lib
+COPY api-gateway ./api-gateway
+COPY auth-service ./auth-service
+COPY hrm-service ./hrm-service
+COPY project-service ./project-service
+COPY chatbot-service ./chatbot-service
+RUN mvn -q -pl ${SERVICE} -am package -DskipTests
+
+FROM eclipse-temurin:17-jre-alpine
+ARG SERVICE
+WORKDIR /app
+COPY --from=builder /src/${SERVICE}/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]

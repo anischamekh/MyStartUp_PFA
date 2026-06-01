@@ -1,0 +1,131 @@
+.page__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.page__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.page__sub {
+  margin: 0.35rem 0 0;
+  color: var(--p-text-muted-color, #64748b);
+  font-size: 0.925rem;
+}
+
+.page__loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cal-nav__title {
+  min-width: 10rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.cal-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cal-approved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color, #64748b);
+  cursor: pointer;
+  user-select: none;
+}
+
+.cal-approved input {
+  accent-color: #22c55e;
+}
+
+.cal-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.cal-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.cal-row--head {
+  border-bottom: 1px solid var(--p-content-border-color, #e2e8f0);
+}
+
+.cal-cell {
+  min-height: 5.5rem;
+  border-right: 1px solid var(--p-content-border-color, #e2e8f0);
+  border-bottom: 1px solid var(--p-content-border-color, #e2e8f0);
+  padding: 0.35rem;
+  font-size: 0.8rem;
+}
+
+.cal-cell:first-child {
+  border-left: 1px solid var(--p-content-border-color, #e2e8f0);
+}
+
+.cal-cell--head {
+  min-height: auto;
+  font-weight: 600;
+  text-align: center;
+  color: var(--p-text-muted-color, #64748b);
+  background: var(--p-content-background, #f8fafc);
+}
+
+.cal-cell--muted {
+  opacity: 0.45;
+}
+
+.cal-day {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.cal-chip {
+  border-radius: 4px;
+  padding: 0.15rem 0.35rem;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: #e0e7ff;
+  color: #312e81;
+}
+
+.cal-chip--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.cal-chip--approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.cal-chip--rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}

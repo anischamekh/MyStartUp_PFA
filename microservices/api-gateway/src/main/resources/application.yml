@@ -1,0 +1,82 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cloud:
+    gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:4200"
+              - "http://127.0.0.1:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            exposedHeaders:
+              - Authorization
+              - Set-Cookie
+            allowCredentials: true
+            maxAge: 3600
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials Access-Control-Allow-Headers Access-Control-Expose-Headers, RETAIN_FIRST
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 50
+            redis-rate-limiter.burstCapacity: 100
+            redis-rate-limiter.requestedTokens: 1
+            key-resolver: "#{@userKeyResolver}"
+      routes:
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/auth/**,/api/users/**,/api/teams/**,/api/employee-profiles/**
+        - id: hrm-service
+          uri: ${HRM_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/leaves/**,/api/payroll/**,/api/documents/**,/api/skills/**,/api/employee-skills/**,/api/trainings/**,/api/evaluations/**,/api/notifications/**,/api/reports/**
+        - id: project-service
+          uri: ${PROJECT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/projects/**,/api/tasks/**
+        - id: chatbot-service
+          uri: ${CHATBOT_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/chatbot/**
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-in-real-projects-change-this-secret}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO

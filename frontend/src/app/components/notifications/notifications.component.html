@@ -1,0 +1,75 @@
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h2 class="page__title">Notifications</h2>
+      <p class="page__sub">Stay on top of tasks and leave updates — unread items are highlighted.</p>
+    </div>
+    <p-button label="Refresh" icon="pi pi-refresh" severity="info" [outlined]="true" (onClick)="reload()" />
+  </div>
+
+  @if (loading) {
+    <p-card>
+      <div class="page__loading">
+        <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+      </div>
+    </p-card>
+  } @else if (items.length === 0) {
+    <p-card>
+      <p class="empty-msg">You're all caught up. No notifications yet.</p>
+    </p-card>
+  } @else {
+    <p-card>
+      <ul class="notif-list">
+        @for (n of items; track n.id) {
+          <li class="notif-item" [class.notif-item--unread]="!n.read">
+            <div class="notif-item__main">
+              <div class="notif-item__meta">
+                <p-tag [value]="typeLabel(n.type)" severity="info" />
+                <time class="notif-time">{{ n.createdAt | date: 'medium' }}</time>
+                @if (!n.read) {
+                  <p-tag value="Unread" severity="info" />
+                }
+              </div>
+              <p class="notif-msg">{{ n.message }}</p>
+            </div>
+            <div class="notif-item__actions">
+              @if (!n.read) {
+                <p-button
+                  label="Mark read"
+                  icon="pi pi-check"
+                  severity="success"
+                  [rounded]="true"
+                  size="small"
+                  (onClick)="markRead(n)"
+                />
+              }
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [rounded]="true"
+                [text]="true"
+                (onClick)="openDelete(n)"
+                aria-label="Delete"
+              />
+            </div>
+          </li>
+        }
+      </ul>
+    </p-card>
+  }
+</div>
+
+<p-dialog
+  header="Delete notification"
+  [(visible)]="deleteModalOpen"
+  [modal]="true"
+  [style]="{ width: 'min(400px, 95vw)' }"
+  [draggable]="false"
+  (onHide)="closeDeleteModal()"
+>
+  <p>Remove this notification?</p>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="closeDeleteModal()" />
+    <p-button label="Delete" icon="pi pi-trash" severity="danger" (onClick)="confirmRemove()" />
+  </ng-template>
+</p-dialog>

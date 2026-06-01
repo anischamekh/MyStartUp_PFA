@@ -1,0 +1,246 @@
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h2 class="page__title">Tasks</h2>
+      <p class="page__sub">
+        @if (isLeader) {
+          Create, assign, and validate work for your team.
+        } @else {
+          Update progress on work assigned to you.
+        }
+      </p>
+    </div>
+    <div class="page__actions">
+      @if (isLeader && !auth.viewOnlyAdmin()) {
+        <p-button label="New task" icon="pi pi-plus" severity="success" (onClick)="openNew()" />
+      }
+      <p-button label="Refresh" icon="pi pi-refresh" severity="info" [outlined]="true" (onClick)="reload()" />
+    </div>
+  </div>
+
+  <p-card>
+    @if (loading) {
+      <div class="page__loading">
+        <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+      </div>
+    } @else {
+      <p-table
+        #dt
+        [value]="tasks"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [globalFilterFields]="['title', 'status', 'priority', 'assigneeName', 'projectTitle', 'creatorName']"
+        sortMode="single"
+        dataKey="id"
+        [tableStyle]="{ 'min-width': '60rem' }"
+      >
+        <ng-template pTemplate="caption">
+          <div class="table-caption">
+            <p-iconfield iconPosition="left">
+              <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+              <input
+                pInputText
+                type="text"
+                (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                placeholder="Search tasks, status, assignee…"
+              />
+            </p-iconfield>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="title">Title <p-sortIcon field="title" /></th>
+            <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
+            <th pSortableColumn="priority">Priority <p-sortIcon field="priority" /></th>
+            <th>Progress</th>
+            <th class="tabular">Est. h</th>
+            <th>Assignee</th>
+            <th class="th-actions" style="width: 12rem; text-align: right">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-t>
+          <tr>
+            <td>
+              <div class="cell-title">{{ t.title }}</div>
+              @if (t.dueDate) {
+                <div class="cell-muted">Due: {{ t.dueDate }}</div>
+              }
+            </td>
+            <td>
+              <p-tag [value]="t.status" [severity]="statusSeverity(t.status)" />
+            </td>
+            <td>
+              <p-tag [value]="t.priority" [severity]="prioritySeverity(t.priority)" />
+            </td>
+            <td>
+              <p-progressBar [value]="t.progress ?? 0" [showValue]="false" [style]="{ height: '8px' }" />
+              <span class="cell-muted">{{ t.progress ?? 0 }}%</span>
+            </td>
+            <td class="tabular">{{ t.estimatedHours ?? '—' }}</td>
+            <td>{{ t.assignedTo?.fullName || t.assignedTo?.username || '—' }}</td>
+            <td class="td-actions">
+              @if (!isLeader && !auth.viewOnlyAdmin()) {
+                <p-button
+                  icon="pi pi-chart-line"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="info"
+                  [disabled]="isTaskLocked(t)"
+                  (onClick)="openProgress(t)"
+                  aria-label="Progress"
+                />
+              }
+              @if (isLeader && !auth.viewOnlyAdmin()) {
+                <p-button
+                  icon="pi pi-check"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="success"
+                  [disabled]="isTaskLocked(t)"
+                  (onClick)="validate(t)"
+                  aria-label="Validate"
+                />
+                <p-button
+                  icon="pi pi-pencil"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="warn"
+                  [disabled]="isTaskLocked(t)"
+                  (onClick)="edit(t)"
+                  aria-label="Edit"
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="danger"
+                  (onClick)="confirmRemove(t)"
+                  aria-label="Delete"
+                />
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8">No tasks to show.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>
+
+<p-dialog
+  [header]="editingId ? 'Edit task' : 'New task'"
+  [(visible)]="editModalOpen"
+  [modal]="true"
+  [style]="{ width: 'min(520px, 95vw)' }"
+  [draggable]="false"
+  (onHide)="closeEditModal()"
+>
+  <div class="dialog-fields">
+    <div>
+      <label class="field-label" for="task-title">Title</label>
+      <input id="task-title" pInputText class="w-full" [(ngModel)]="form.title" />
+    </div>
+    <div class="span-2">
+      <label class="field-label" for="task-desc">Description</label>
+      <textarea id="task-desc" pTextarea [(ngModel)]="form.description" rows="3" class="w-full"></textarea>
+    </div>
+    <div>
+      <label class="field-label" for="task-due">Due date</label>
+      <p-datepicker
+        id="task-due"
+        [(ngModel)]="dueDateModel"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        appendTo="body"
+        inputId="task-due-input"
+        styleClass="w-full"
+      />
+    </div>
+    <div>
+      <label class="field-label" for="task-pri">Priority</label>
+      <p-select
+        inputId="task-pri"
+        [options]="priorities"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="selectedPriority"
+        placeholder="Priority"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+    <div>
+      <label class="field-label" for="task-assign">Assignee</label>
+      <p-select
+        inputId="task-assign"
+        [options]="assigneeOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="selectedUserId"
+        placeholder="Assignee"
+        [showClear]="true"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+    <div>
+      <label class="field-label" for="task-hours">Estimated hours</label>
+      <p-inputNumber
+        inputId="task-hours"
+        [(ngModel)]="form.estimatedHours"
+        [min]="0"
+        [maxFractionDigits]="2"
+        placeholder="Hours"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="closeEditModal()" />
+    <p-button label="Save" icon="pi pi-check" severity="success" (onClick)="submitEdit()" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Update progress"
+  [(visible)]="progressModalOpen"
+  [modal]="true"
+  [style]="{ width: 'min(420px, 95vw)' }"
+  [draggable]="false"
+  (onHide)="closeProgressModal()"
+>
+  <div class="dialog-fields">
+    <div class="span-2">
+      <label class="field-label" for="task-progress">Progress ({{ progressValue }}%)</label>
+      <p-slider
+        id="task-progress"
+        [(ngModel)]="progressValue"
+        [min]="progressSliderMin()"
+        [max]="100"
+        [step]="1"
+      />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" severity="danger"  (onClick)="closeProgressModal()" />
+    <p-button label="Save" icon="pi pi-check" severity="success" (onClick)="saveProgress()" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Delete task"
+  [(visible)]="deleteModalOpen"
+  [modal]="true"
+  [style]="{ width: 'min(400px, 95vw)' }"
+  [draggable]="false"
+  (onHide)="cancelDelete()"
+>
+  <p>Delete task "{{ toDelete?.title }}"?</p>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" severity="danger"  (onClick)="cancelDelete()" />
+    <p-button label="Delete" icon="pi pi-trash" severity="danger" (onClick)="confirmDelete()" />
+  </ng-template>
+</p-dialog>

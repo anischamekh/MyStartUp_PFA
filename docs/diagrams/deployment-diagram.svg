@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520">
+  <rect width="900" height="520" fill="#f1f5f9"/>
+  <text x="450" y="32" text-anchor="middle" font-size="20" font-weight="bold" font-family="Arial,sans-serif">Kubernetes Deployment</text>
+  <rect x="40" y="50" width="820" height="430" rx="8" fill="#fff" stroke="#334155"/>
+  <text x="60" y="78" font-size="14" font-weight="bold">Ingress (mystartup.local)</text>
+  <rect x="300" y="100" width="140" height="50" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="370" y="130" text-anchor="middle" font-size="12">api-gateway</text>
+  <rect x="80" y="200" width="110" height="44" fill="#dcfce7" stroke="#16a34a"/><text x="135" y="227" text-anchor="middle" font-size="11">auth</text>
+  <rect x="210" y="200" width="110" height="44" fill="#dcfce7" stroke="#16a34a"/><text x="265" y="227" text-anchor="middle" font-size="11">hrm</text>
+  <rect x="340" y="200" width="110" height="44" fill="#dcfce7" stroke="#16a34a"/><text x="395" y="227" text-anchor="middle" font-size="11">project</text>
+  <rect x="470" y="200" width="110" height="44" fill="#dcfce7" stroke="#16a34a"/><text x="525" y="227" text-anchor="middle" font-size="11">chatbot</text>
+  <rect x="80" y="320" width="100" height="44" fill="#fef3c7" stroke="#d97706"/><text x="130" y="347" text-anchor="middle" font-size="11">postgres</text>
+  <rect x="210" y="320" width="100" height="44" fill="#fef3c7" stroke="#d97706"/><text x="260" y="347" text-anchor="middle" font-size="11">kafka</text>
+  <rect x="340" y="320" width="100" height="44" fill="#fef3c7" stroke="#d97706"/><text x="390" y="347" text-anchor="middle" font-size="11">redis</text>
+  <rect x="600" y="320" width="120" height="44" fill="#e0e7ff" stroke="#6366f1"/><text x="660" y="347" text-anchor="middle" font-size="11">prometheus</text>
+  <rect x="740" y="320" width="100" height="44" fill="#e0e7ff" stroke="#6366f1"/><text x="790" y="347" text-anchor="middle" font-size="11">grafana</text>
+  <line x1="370" y1="150" x2="135" y2="200" stroke="#64748b"/>
+  <line x1="370" y1="150" x2="265" y2="200" stroke="#64748b"/>
+  <line x1="370" y1="150" x2="395" y2="200" stroke="#64748b"/>
+  <line x1="370" y1="150" x2="525" y2="200" stroke="#64748b"/>
+</svg>

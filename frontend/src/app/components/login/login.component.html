@@ -1,0 +1,62 @@
+<div class="login-page">
+  <div class="login-page__bg" aria-hidden="true">
+    <div class="login-page__orb login-page__orb--1"></div>
+    <div class="login-page__orb login-page__orb--2"></div>
+  </div>
+
+  <div class="login-page__inner">
+    <p-card styleClass="login-card">
+      <div class="login-card__header">
+        <div class="login-card__avatar">E</div>
+        <div>
+          <h1 class="login-card__title">{{ 'auth.welcome' | translate }}</h1>
+          <p class="login-card__subtitle">{{ 'auth.subtitle' | translate }}</p>
+        </div>
+      </div>
+
+      <form class="login-form" (ngSubmit)="onSubmit()">
+        <div class="login-field">
+          <label class="field-label" for="login-user">{{ 'auth.username' | translate }}</label>
+          <p-iconfield iconPosition="left">
+            <p-inputicon><i class="pi pi-user"></i></p-inputicon>
+            <input
+              id="login-user"
+              pInputText
+              [(ngModel)]="username"
+              name="username"
+              required
+              autocomplete="username"
+              class="w-full"
+            />
+          </p-iconfield>
+        </div>
+
+        <div class="login-field">
+          <label class="field-label" for="login-pass">{{ 'auth.password' | translate }}</label>
+          <p-password
+            inputId="login-pass"
+            [(ngModel)]="password"
+            name="password"
+            [feedback]="false"
+            [toggleMask]="true"
+            autocomplete="current-password"
+            [fluid]="true"
+            styleClass="w-full"
+          />
+        </div>
+
+        <p-button
+          type="submit"
+          [label]="'auth.signIn' | translate"
+          icon="pi pi-sign-in"
+          severity="info"
+          styleClass="login-submit"
+          [disabled]="loading"
+          [loading]="loading"
+        />
+      </form>
+    </p-card>
+
+    <p class="login-hint">{{ 'auth.demoHint' | translate }}</p>
+  </div>
+</div>

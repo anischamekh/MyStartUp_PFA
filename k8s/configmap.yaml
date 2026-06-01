@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mystartup-config
+data:
+  AUTH_SERVICE_URL: "http://auth-service:8081"
+  HRM_SERVICE_URL: "http://hrm-service:8082"
+  PROJECT_SERVICE_URL: "http://project-service:8083"
+  CHATBOT_SERVICE_URL: "http://chatbot-service:8084"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  OLLAMA_BASE_URL: "http://ollama:11434"
+  OLLAMA_MODEL: "llama3.2:1b"

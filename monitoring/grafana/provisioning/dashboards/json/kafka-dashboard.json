@@ -1,0 +1,12 @@
+{
+  "title": "MyStartUp Kafka Events",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Kafka broker up",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "kafka_server_replicamanager_leadercount" }]
+    }
+  ],
+  "schemaVersion": 39
+}

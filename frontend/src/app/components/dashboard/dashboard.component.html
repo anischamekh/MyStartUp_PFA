@@ -1,0 +1,87 @@
+@if (loading) {
+  <p>Loading…</p>
+} @else if (loadError) {
+  <p-card header="Error">
+    <p>{{ loadError }}</p>
+    <p-button label="Retry" icon="pi pi-refresh" (onClick)="reloadAll()" />
+  </p-card>
+} @else {
+  <div class="dash-grid">
+    <p-card header="Overview">
+      <p class="dash-intro">
+        @switch (role()) {
+          @case ('ADMIN') {
+            Browse the whole workspace (read-only). Open sections from the sidebar to review data.
+          }
+          @case ('MANAGER') {
+            Track projects under <strong>Projects</strong> and approve leave requests.
+          }
+          @case ('HR') {
+            Manage people and teams from the sidebar.
+          }
+          @default {
+            Your tasks and requests at a glance.
+          }
+        }
+      </p>
+    </p-card>
+
+    <div class="dash-stats">
+      <p-card header="Total tasks"><strong>{{ totalTasks }}</strong></p-card>
+      <p-card header="Completed"><strong>{{ completedTasks }}</strong></p-card>
+      <p-card header="In progress"><strong>{{ pendingTasks }}</strong></p-card>
+      <p-card header="Pending leaves"><strong>{{ pendingLeaves }}</strong></p-card>
+    </div>
+
+    @if ((role() !== 'MANAGER' && role() !== 'ADMIN') && taskChartRows.length && tasks.length) {
+      <p-card header="Task distribution">
+        <div class="chart-panel">
+          <div class="chart-bars">
+            @for (row of taskChartRows; track row.key) {
+              <div class="chart-bar-row">
+                <span class="chart-bar-row__label">{{ row.label }}</span>
+                <div class="chart-bar-track">
+                  <div
+                    class="chart-bar-fill"
+                    [ngClass]="'chart-bar-fill--' + row.tone"
+                    [style.width.%]="row.pct"
+                  ></div>
+                </div>
+                <span class="chart-bar-row__count">{{ row.count }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </p-card>
+    }
+
+    @if ((role() === 'MANAGER' || role() === 'ADMIN') && reportSummary) {
+      <p-card header="Tasks by status">
+        <div class="p-chart-wrap">
+          <p-chart type="doughnut" [data]="mgmtTasksDoughnut" [options]="chartOpts" />
+        </div>
+      </p-card>
+
+      <p-card header="Leaves by status">
+        <div class="p-chart-wrap p-chart-wrap--bar">
+          <p-chart type="bar" [data]="mgmtLeavesBar" [options]="barOpts" />
+        </div>
+      </p-card>
+
+      <p-card header="Employees per team">
+        <div class="p-chart-wrap p-chart-wrap--bar">
+          <p-chart type="bar" [data]="mgmtEmployeesBar" [options]="barOpts" />
+        </div>
+      </p-card>
+    }
+
+    @if (role() === 'ADMIN') {
+      <p-card header="Administrator">
+        <p>
+          You can view all modules; creating, editing, or deleting records is disabled. Use the bell icon for
+          notifications.
+        </p>
+      </p-card>
+    }
+  </div>
+}

@@ -1,0 +1,147 @@
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h2 class="page__title">Teams</h2>
+      <p class="page__sub">Organize people under team leaders.</p>
+    </div>
+    @if (!auth.viewOnlyAdmin()) {
+      <p-button label="New team" icon="pi pi-plus" severity="success" (onClick)="openNew()" />
+    }
+  </div>
+
+  <p-card>
+    @if (loading) {
+      <div class="page__loading">
+        <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+      </div>
+    } @else {
+      <p-table
+        #dt
+        [value]="teams"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [globalFilterFields]="['name', 'speciality', 'leaderName']"
+        sortMode="single"
+        dataKey="id"
+        [tableStyle]="{ 'min-width': '48rem' }"
+      >
+        <ng-template pTemplate="caption">
+          <div class="table-caption">
+            <p-iconfield iconPosition="left">
+              <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+              <input
+                pInputText
+                type="text"
+                (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                placeholder="Search team name, speciality, leader…"
+              />
+            </p-iconfield>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="name">Team <p-sortIcon field="name" /></th>
+            <th pSortableColumn="speciality">Speciality <p-sortIcon field="speciality" /></th>
+            <th>Leader</th>
+            @if (!auth.viewOnlyAdmin()) {
+              <th class="th-actions" style="width: 10rem; text-align: right">Actions</th>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-t>
+          <tr>
+            <td class="cell-title">{{ t.name }}</td>
+            <td>{{ specialityLabel(t.speciality) }}</td>
+            <td>{{ t.teamLeaderName || t.teamLeader?.fullName || t.teamLeader?.username || '—' }}</td>
+            @if (!auth.viewOnlyAdmin()) {
+              <td class="td-actions">
+                <p-button
+                  icon="pi pi-pencil"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="warn"
+                  (onClick)="edit(t)"
+                  aria-label="Edit"
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="danger"
+                  (onClick)="confirmRemove(t)"
+                  aria-label="Delete"
+                />
+              </td>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4">No teams yet. Create your first team.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>
+
+<p-dialog
+  [header]="editingId ? 'Edit team' : 'New team'"
+  [(visible)]="editModalOpen"
+  [modal]="true"
+  [style]="{ width: 'min(480px, 95vw)' }"
+  [draggable]="false"
+  (onHide)="closeEditModal()"
+>
+  <div class="dialog-fields">
+    <div>
+      <label class="field-label" for="team-name">Team name</label>
+      <input id="team-name" pInputText class="w-full" [(ngModel)]="form.name" />
+    </div>
+    <div>
+      <label class="field-label" for="team-spec">Speciality</label>
+      <p-select
+        inputId="team-spec"
+        [options]="specialityOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="form.speciality"
+        placeholder="Speciality"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+    <div>
+      <label class="field-label" for="team-lead">Leader</label>
+      <p-select
+        inputId="team-lead"
+        [options]="leaderOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="selectedLeaderId"
+        placeholder="Leader"
+        [showClear]="true"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" severity="danger"  (onClick)="closeEditModal()" />
+    <p-button label="Save" icon="pi pi-check" severity="success" (onClick)="submit()" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Delete team"
+  [(visible)]="deleteModalOpen"
+  [modal]="true"
+  [style]="{ width: 'min(400px, 95vw)' }"
+  [draggable]="false"
+  (onHide)="cancelDelete()"
+>
+  <p>Delete team "{{ toDelete?.name }}"?</p>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" severity="danger" (onClick)="cancelDelete()" />
+    <p-button label="Delete" icon="pi pi-trash" severity="danger" (onClick)="confirmDelete()" />
+  </ng-template>
+</p-dialog>

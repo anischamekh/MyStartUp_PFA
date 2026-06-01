@@ -1,0 +1,104 @@
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h2 class="page__title">Evaluations</h2>
+      <p class="page__sub">
+        Scores and criteria (0–100). Team leaders: their team only. HR and managers: any employee. Admins: view only.
+      </p>
+    </div>
+    @if (!auth.viewOnlyAdmin() && (auth.role === 'HR' || auth.role === 'MANAGER' || auth.role === 'TEAM_LEADER')) {
+      <p-button label="New evaluation" icon="pi pi-plus" severity="success" (onClick)="openNew()" />
+    }
+  </div>
+
+  <p-card>
+    @if (loading) {
+      <div class="page__loading">
+        <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+      </div>
+    } @else {
+      <p-table [value]="rows" [paginator]="true" [rows]="10" dataKey="id" [tableStyle]="{ 'min-width': '52rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Employee</th>
+            <th>Evaluator</th>
+            <th class="tabular">Score</th>
+            <th class="tabular">Tech</th>
+            <th class="tabular">Team</th>
+            <th class="tabular">Deadline</th>
+            <th>Date</th>
+            <th class="th-actions" style="width: 8rem; text-align: right">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-ev>
+          <tr>
+            <td>{{ ev.employee?.fullName || ev.employee?.username }}</td>
+            <td>{{ ev.evaluator?.fullName || ev.evaluator?.username }}</td>
+            <td class="tabular">{{ ev.score }}</td>
+            <td class="tabular">{{ ev.technicalSkill ?? '—' }}</td>
+            <td class="tabular">{{ ev.teamwork ?? '—' }}</td>
+            <td class="tabular">{{ ev.deadlineRespect ?? '—' }}</td>
+            <td>{{ ev.date }}</td>
+            <td class="td-actions">
+              @if (canMutate(ev)) {
+                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="warn" (onClick)="edit(ev)" />
+                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="remove(ev)" />
+              }
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>
+
+<p-dialog
+  [header]="editingId ? 'Edit evaluation' : 'New evaluation'"
+  [(visible)]="dialogOpen"
+  [modal]="true"
+  [style]="{ width: 'min(480px, 95vw)' }"
+>
+  <div class="dialog-fields dialog-fields--single">
+    @if (editingId == null) {
+      <div>
+        <label class="field-label">Employee</label>
+        <p-select
+          [options]="userOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="formEmployeeId"
+          placeholder="Employee"
+          [style]="{ width: '100%' }"
+        />
+      </div>
+    }
+    <div>
+      <label class="field-label">Overall score (0–100)</label>
+      <p-inputNumber [(ngModel)]="form.score" [min]="0" [max]="100" [style]="{ width: '100%' }" />
+    </div>
+    <div>
+      <label class="field-label">Technical skill (optional)</label>
+      <p-inputNumber [(ngModel)]="form.technicalSkill" [min]="0" [max]="100" [style]="{ width: '100%' }" />
+    </div>
+    <div>
+      <label class="field-label">Teamwork (optional)</label>
+      <p-inputNumber [(ngModel)]="form.teamwork" [min]="0" [max]="100" [style]="{ width: '100%' }" />
+    </div>
+    <div>
+      <label class="field-label">Deadline respect (optional)</label>
+      <p-inputNumber [(ngModel)]="form.deadlineRespect" [min]="0" [max]="100" [style]="{ width: '100%' }" />
+    </div>
+    <div>
+      <label class="field-label">Comment</label>
+      <textarea pTextarea [(ngModel)]="form.comment" rows="4" class="w-full" placeholder="Notes"></textarea>
+    </div>
+    <div>
+      <label class="field-label">Date</label>
+      <input type="date" class="w-full p-inputtext p-component" [(ngModel)]="form.date" />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="danger" [text]="true" (onClick)="dialogOpen = false" />
+    <p-button label="Save" icon="pi pi-check" severity="success" (onClick)="save()" />
+  </ng-template>
+</p-dialog>

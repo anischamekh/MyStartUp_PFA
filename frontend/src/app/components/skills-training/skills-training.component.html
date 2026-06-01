@@ -1,0 +1,243 @@
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h2 class="page__title">Skills &amp; training</h2>
+      <p class="page__sub">Reference skills, assign them to employees, and publish trainings. HR manages assignments.</p>
+    </div>
+  </div>
+
+  <p-card header="Skills" styleClass="st-section">
+    @if (isHr) {
+      <p-button label="New skill" icon="pi pi-plus" severity="success" (onClick)="openSkill()" styleClass="st-toolbar-btn" />
+    }
+    @if (loadingSkills) {
+      <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+    } @else {
+      <p-table [value]="skills" [paginator]="true" [rows]="8" dataKey="id">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            @if (isHr) {
+              <th style="width: 8rem">Actions</th>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-s>
+          <tr>
+            <td>{{ s.name }}</td>
+            @if (isHr) {
+              <td>
+                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="warn" (onClick)="editSkill(s)" />
+                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteSkill(s)" />
+              </td>
+            }
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+
+  <p-card header="Employee skills" styleClass="st-section">
+    @if (isHr) {
+      <p-button label="Assign skill" icon="pi pi-user-plus" severity="success" (onClick)="openEs()" styleClass="st-toolbar-btn" />
+    }
+    @if (loadingEmp) {
+      <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+    } @else {
+      <p-table [value]="empSkills" [paginator]="true" [rows]="8" dataKey="id">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Employee</th>
+            <th>Skill</th>
+            <th>Level</th>
+            @if (isHr) {
+              <th style="width: 5rem"></th>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-es>
+          <tr>
+            <td>{{ es.user?.fullName || es.user?.username }}</td>
+            <td>{{ es.skill?.name }}</td>
+            <td>{{ es.level }}</td>
+            @if (isHr) {
+              <td>
+                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteEs(es)" />
+              </td>
+            }
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+
+  <p-card header="Trainings" styleClass="st-section">
+    @if (isHr) {
+      <p-button label="New training" icon="pi pi-plus" severity="success" (onClick)="openTr()" styleClass="st-toolbar-btn" />
+    }
+    @if (loadingTrain) {
+      <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+    } @else {
+      <p-table [value]="trainings" [paginator]="true" [rows]="8" dataKey="id">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Title</th>
+            <th>Date</th>
+            @if (isHr) {
+              <th style="width: 8rem">Actions</th>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-t>
+          <tr>
+            <td>{{ t.title }}</td>
+            <td>{{ t.date }}</td>
+            @if (isHr) {
+              <td>
+                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="warn" (onClick)="editTr(t)" />
+                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteTr(t)" />
+              </td>
+            }
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+
+  @if (isHr) {
+    <p-card header="Training attendance" styleClass="st-section">
+      <p class="st-hint">Assign employees to a session and track participation.</p>
+      <div class="dialog-fields dialog-fields--single st-att-toolbar">
+        <div>
+          <label class="field-label">Training</label>
+          <p-select
+            [options]="trainingOptions()"
+            optionLabel="label"
+            optionValue="value"
+            [(ngModel)]="trainingFocusId"
+            placeholder="Select training"
+            [showClear]="true"
+            [style]="{ width: '100%' }"
+            (ngModelChange)="onTrainingFocusChange()"
+          />
+        </div>
+        <div>
+          <label class="field-label">Add employee</label>
+          <p-select
+            [options]="userOptions"
+            optionLabel="label"
+            optionValue="value"
+            [(ngModel)]="taUserId"
+            placeholder="Employee"
+            [style]="{ width: '100%' }"
+          />
+        </div>
+        <div class="st-att-actions">
+          <p-button label="Assign" icon="pi pi-user-plus" severity="success" (onClick)="addTrainingAttendance()" />
+        </div>
+      </div>
+      @if (loadingAtt) {
+        <p-progressSpinner strokeWidth="4" ariaLabel="Loading" />
+      } @else if (trainingFocusId != null) {
+        <p-table [value]="attendanceRows" dataKey="id" [tableStyle]="{ 'min-width': '32rem' }">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Employee</th>
+              <th style="width: 10rem">Participation</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>{{ row.user?.fullName || row.user?.username }}</td>
+              <td>
+                <p-button
+                  [label]="row.attended ? 'Attended' : 'Mark attended'"
+                  [severity]="row.attended ? 'success' : 'secondary'"
+                  [outlined]="!row.attended"
+                  size="small"
+                  (onClick)="toggleAttendance(row)"
+                />
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="2">No assignments yet. Add employees above.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
+  }
+</div>
+
+<p-dialog [header]="skillEditId ? 'Edit skill' : 'New skill'" [(visible)]="skillDialog" [modal]="true" [style]="{ width: 'min(400px, 95vw)' }">
+  <label class="field-label">Name</label>
+  <input pInputText class="w-full" [(ngModel)]="skillForm.name" />
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="danger" [text]="true" (onClick)="skillDialog = false" />
+    <p-button label="Save" severity="success" (onClick)="saveSkill()" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog header="Assign skill" [(visible)]="esDialog" [modal]="true" [style]="{ width: 'min(420px, 95vw)' }">
+  <div class="dialog-fields dialog-fields--single">
+    <div>
+      <label class="field-label">Employee</label>
+      <p-select
+        [options]="userOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="esUserId"
+        placeholder="User"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+    <div>
+      <label class="field-label">Skill</label>
+      <p-select
+        [options]="skillOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="esSkillId"
+        placeholder="Skill"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+    <div>
+      <label class="field-label">Level</label>
+      <p-select
+        [options]="levelOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="esLevel"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="danger" [text]="true" (onClick)="esDialog = false" />
+    <p-button label="Save" severity="success" (onClick)="saveEs()" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog [header]="trEditId ? 'Edit training' : 'New training'" [(visible)]="trDialog" [modal]="true" [style]="{ width: 'min(480px, 95vw)' }">
+  <div class="dialog-fields dialog-fields--single">
+    <div>
+      <label class="field-label">Title</label>
+      <input pInputText class="w-full" [(ngModel)]="trForm.title" />
+    </div>
+    <div>
+      <label class="field-label">Description</label>
+      <textarea pTextarea class="w-full" [(ngModel)]="trForm.description" rows="3"></textarea>
+    </div>
+    <div>
+      <label class="field-label">Date</label>
+      <p-datepicker [(ngModel)]="trDate" dateFormat="yy-mm-dd" [showIcon]="true" appendTo="body" styleClass="w-full" />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="danger" [text]="true" (onClick)="trDialog = false" />
+    <p-button label="Save" severity="success" (onClick)="saveTr()" />
+  </ng-template>
+</p-dialog>

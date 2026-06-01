@@ -1,0 +1,25 @@
+.emp-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.emp-toolbar input[pInputText] {
+  flex: 1;
+  min-width: 160px;
+}
+
+.table-caption {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.req {
+  color: var(--p-red-500, #ef4444);
+}

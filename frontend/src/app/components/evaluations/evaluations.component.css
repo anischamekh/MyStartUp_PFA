@@ -1,0 +1,48 @@
+.page__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.page__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.page__sub {
+  margin: 0.35rem 0 0;
+  color: var(--p-text-muted-color, #64748b);
+  font-size: 0.925rem;
+}
+
+.page__loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.dialog-fields--single {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.35rem;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.w-full {
+  width: 100%;
+  box-sizing: border-box;
+}
