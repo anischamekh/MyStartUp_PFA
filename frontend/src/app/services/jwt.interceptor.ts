@@ -1,16 +1,10 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
+/** Sends cookies (HttpOnly JWT) on every API request; no Bearer token in localStorage. */
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth = inject(AuthService);
-  const token = auth.token;
-  if (!token) return next(req);
-
-  return next(
-    req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    })
-  );
+  if (!req.url.startsWith(environment.apiBaseUrl)) {
+    return next(req);
+  }
+  return next(req.clone({ withCredentials: true }));
 };
-

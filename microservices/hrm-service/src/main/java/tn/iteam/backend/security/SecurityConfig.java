@@ -43,13 +43,13 @@ public class SecurityConfig {
         http
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**").permitAll()
-                        // Own notifications: mark read / delete (all roles including ADMIN)
+                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/actuator/**").permitAll()
+
                         .requestMatchers(HttpMethod.PUT, "/api/notifications/**")
                                 .hasAnyAuthority("EMPLOYEE", "TEAM_LEADER", "MANAGER", "HR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/notifications/**")
                                 .hasAnyAuthority("EMPLOYEE", "TEAM_LEADER", "MANAGER", "HR", "ADMIN")
-                        // ADMIN is read-only: domain mutations for non-admin roles only
+
                         .requestMatchers(HttpMethod.POST, "/api/**")
                                 .hasAnyAuthority("EMPLOYEE", "TEAM_LEADER", "MANAGER", "HR")
                         .requestMatchers(HttpMethod.PUT, "/api/**")

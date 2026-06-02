@@ -35,6 +35,10 @@
         <pdfbox.version>2.0.31</pdfbox.version>
         <poi.version>5.2.5</poi.version>
         <jacoco.minimum.coverage>0.70</jacoco.minimum.coverage>
+        <sonar.organization>anischamekh</sonar.organization>
+        <sonar.projectKey>anischamekh_MyStartUp_PFA</sonar.projectKey>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     </properties>
 
     <dependencyManagement>
@@ -101,6 +105,10 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -112,6 +120,11 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.12</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>4.0.0.4121</version>
                 </plugin>
             </plugins>
         </pluginManagement>

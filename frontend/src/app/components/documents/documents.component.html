@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
   <div class="page__head">
     <div>
       <h2 class="page__title">Documents</h2>
@@ -16,18 +16,18 @@
       <p-table [value]="docs" [paginator]="true" [rows]="10" dataKey="id" [tableStyle]="{ 'min-width': '48rem' }">
         <ng-template pTemplate="header">
           <tr>
-            <th>Name</th>
-            <th>Employee</th>
-            <th>Type</th>
-            <th>Uploaded</th>
-            <th style="width: 10rem">Actions</th>
+            <th scope="col">Name</th>
+            <th scope="col">Employee</th>
+            <th scope="col">Type</th>
+            <th scope="col">Uploaded</th>
+            <th scope="col" style="width: 10rem">Actions</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-d>
           <tr>
             <td>{{ d.name }}</td>
             <td>{{ d.user?.fullName || d.user?.username }}</td>
-            <td>{{ d.type || '—' }}</td>
+            <td>{{ d.type || 'â€”' }}</td>
             <td>{{ d.uploadDate | date: 'short' }}</td>
             <td>
               <p-button icon="pi pi-download" [rounded]="true" [text]="true" severity="success" (onClick)="download(d)" />
@@ -48,8 +48,9 @@
 <p-dialog header="Upload document" [(visible)]="uploadOpen" [modal]="true" [style]="{ width: 'min(480px, 95vw)' }">
   <div class="dialog-fields dialog-fields--single">
     <div>
-      <label class="field-label">Employee</label>
+      <label class="field-label" for="uploadUserId">Employee</label>
       <p-select
+        inputId="uploadUserId"
         [options]="userOptions"
         optionLabel="label"
         optionValue="value"
@@ -60,16 +61,16 @@
       />
     </div>
     <div>
-      <label class="field-label">Display name (optional)</label>
-      <input pInputText class="w-full" [(ngModel)]="uploadName" />
+      <label class="field-label" for="uploadName">Display name (optional)</label>
+      <input id="uploadName" pInputText class="w-full" [(ngModel)]="uploadName" />
     </div>
     <div>
-      <label class="field-label">Type (optional)</label>
-      <input pInputText class="w-full" [(ngModel)]="uploadType" placeholder="e.g. CONTRACT" />
+      <label class="field-label" for="uploadType">Type (optional)</label>
+      <input id="uploadType" pInputText class="w-full" [(ngModel)]="uploadType" placeholder="e.g. CONTRACT" />
     </div>
     <div class="span-2">
-      <label class="field-label">File</label>
-      <input type="file" class="w-full" (change)="onNativeFile($event)" />
+      <label class="field-label" for="uploadFile">File</label>
+      <input id="uploadFile" type="file" class="w-full" (change)="onNativeFile($event)" />
     </div>
   </div>
   <ng-template pTemplate="footer">
@@ -77,3 +78,4 @@
     <p-button label="Upload" icon="pi pi-check" severity="success" (onClick)="submitUpload()" />
   </ng-template>
 </p-dialog>
+

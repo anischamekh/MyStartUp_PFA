@@ -4,13 +4,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import tn.iteam.common.security.JwtTokenResolver;
 import tn.iteam.common.security.SharedJwtService;
 
 @Component
@@ -37,13 +40,12 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String token = resolveToken(exchange.getRequest());
+        if (token == null) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
-        String token = authHeader.substring(7);
         if (!jwtService.isTokenValid(token)) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
@@ -53,13 +55,32 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered {
         String role = jwtService.extractRole(token);
         Long userId = jwtService.extractUserId(token);
 
-        ServerHttpRequest mutated = exchange.getRequest().mutate()
+        ServerHttpRequest.Builder builder = exchange.getRequest().mutate()
                 .header("X-User-Name", username == null ? "" : username)
                 .header("X-User-Role", role == null ? "" : role)
-                .header("X-User-Id", userId == null ? "" : String.valueOf(userId))
-                .build();
+                .header("X-User-Id", userId == null ? "" : String.valueOf(userId));
 
-        return chain.filter(exchange.mutate().request(mutated).build());
+        if (exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION) == null) {
+            builder.header(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        }
+
+        return chain.filter(exchange.mutate().request(builder.build()).build());
+    }
+
+    private String resolveToken(ServerHttpRequest request) {
+        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        MultiValueMap<String, HttpCookie> cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        HttpCookie access = cookies.getFirst(JwtTokenResolver.ACCESS_TOKEN_COOKIE);
+        if (access != null && access.getValue() != null && !access.getValue().isBlank()) {
+            return access.getValue();
+        }
+        return null;
     }
 
     private boolean isPublic(String path) {

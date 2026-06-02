@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
   <div class="page__head">
     <div>
       <h2 class="page__title">Skills &amp; training</h2>
@@ -16,9 +16,9 @@
       <p-table [value]="skills" [paginator]="true" [rows]="8" dataKey="id">
         <ng-template pTemplate="header">
           <tr>
-            <th>Name</th>
+            <th scope="col">Name</th>
             @if (isHr) {
-              <th style="width: 8rem">Actions</th>
+              <th scope="col" style="width: 8rem">Actions</th>
             }
           </tr>
         </ng-template>
@@ -47,11 +47,11 @@
       <p-table [value]="empSkills" [paginator]="true" [rows]="8" dataKey="id">
         <ng-template pTemplate="header">
           <tr>
-            <th>Employee</th>
-            <th>Skill</th>
-            <th>Level</th>
+            <th scope="col">Employee</th>
+            <th scope="col">Skill</th>
+            <th scope="col">Level</th>
             @if (isHr) {
-              <th style="width: 5rem"></th>
+              <th scope="col" style="width: 5rem"></th>
             }
           </tr>
         </ng-template>
@@ -81,10 +81,10 @@
       <p-table [value]="trainings" [paginator]="true" [rows]="8" dataKey="id">
         <ng-template pTemplate="header">
           <tr>
-            <th>Title</th>
-            <th>Date</th>
+            <th scope="col">Title</th>
+            <th scope="col">Date</th>
             @if (isHr) {
-              <th style="width: 8rem">Actions</th>
+              <th scope="col" style="width: 8rem">Actions</th>
             }
           </tr>
         </ng-template>
@@ -142,8 +142,8 @@
         <p-table [value]="attendanceRows" dataKey="id" [tableStyle]="{ 'min-width': '32rem' }">
           <ng-template pTemplate="header">
             <tr>
-              <th>Employee</th>
-              <th style="width: 10rem">Participation</th>
+              <th scope="col">Employee</th>
+              <th scope="col" style="width: 10rem">Participation</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-row>
@@ -241,3 +241,4 @@
     <p-button label="Save" severity="success" (onClick)="saveTr()" />
   </ng-template>
 </p-dialog>
+

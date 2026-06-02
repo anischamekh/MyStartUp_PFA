@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
   <div class="page__head">
     <div>
       <h2 class="page__title">Leave requests</h2>
@@ -6,7 +6,7 @@
         @if (isApprover) {
           Review and approve time away. HR and managers see all pending requests.
         } @else {
-          Request time off — balances are enforced automatically.
+          Request time off â€” balances are enforced automatically.
         }
       </p>
     </div>
@@ -55,20 +55,20 @@
                 pInputText
                 type="text"
                 (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-                placeholder="Search employee, dates, status…"
+                placeholder="Search employee, dates, statusâ€¦"
               />
             </p-iconfield>
           </div>
         </ng-template>
         <ng-template pTemplate="header">
           <tr>
-            <th>Employee</th>
-            <th>Type</th>
-            <th pSortableColumn="startDate">Start <p-sortIcon field="startDate" /></th>
-            <th pSortableColumn="endDate">End <p-sortIcon field="endDate" /></th>
-            <th pSortableColumn="days">Days <p-sortIcon field="days" /></th>
-            <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
-            <th style="width: 14rem">Actions</th>
+            <th scope="col">Employee</th>
+            <th scope="col">Type</th>
+            <th scope="col" pSortableColumn="startDate">Start <p-sortIcon field="startDate" /></th>
+            <th scope="col" pSortableColumn="endDate">End <p-sortIcon field="endDate" /></th>
+            <th scope="col" pSortableColumn="days">Days <p-sortIcon field="days" /></th>
+            <th scope="col" pSortableColumn="status">Status <p-sortIcon field="status" /></th>
+            <th scope="col" style="width: 14rem">Actions</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-l>
@@ -102,7 +102,7 @@
               } @else if (l.status === 'PENDING') {
                 <span class="cell-muted">Awaiting review</span>
               } @else {
-                <span class="cell-muted">—</span>
+                <span class="cell-muted">â€”</span>
               }
             </td>
           </tr>
@@ -117,7 +117,7 @@
   </p-card>
 
   <p-card styleClass="leave-calendar-card">
-    <h3 class="calendar-card-title">My leave — calendar</h3>
+    <h3 class="calendar-card-title">My leave â€” calendar</h3>
     <p class="calendar-card-hint">Browse the month; approved blocks are listed below.</p>
     <div class="calendar-row">
       <p-datepicker [(ngModel)]="calendarMonth" [inline]="true" dateFormat="yy-mm-dd" />
@@ -128,7 +128,7 @@
         } @else {
           <ul class="leave-blocks">
             @for (b of approvedBlocksMine(); track b.start + b.end) {
-              <li>{{ b.start }} → {{ b.end }} @if (b.days) { ({{ b.days }} days) }</li>
+              <li>{{ b.start }} â†’ {{ b.end }} @if (b.days) { ({{ b.days }} days) }</li>
             }
           </ul>
         }
@@ -227,3 +227,4 @@
     }
   </ng-template>
 </p-dialog>
+

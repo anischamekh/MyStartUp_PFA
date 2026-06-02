@@ -1,8 +1,8 @@
-<div class="page">
+﻿<div class="page">
   <div class="page__head">
     <div>
       <h2 class="page__title">Payroll</h2>
-      <p class="page__sub">Simple salary records: total = base + bonus − deductions. HR manages; employees see their own.</p>
+      <p class="page__sub">Simple salary records: total = base + bonus âˆ’ deductions. HR manages; employees see their own.</p>
     </div>
     @if (canManage) {
       <p-button label="New payroll" icon="pi pi-plus" severity="success" (onClick)="openNew()" />
@@ -18,14 +18,14 @@
       <p-table [value]="rows" [paginator]="true" [rows]="10" dataKey="id" [tableStyle]="{ 'min-width': '52rem' }">
         <ng-template pTemplate="header">
           <tr>
-            <th>Employee</th>
-            <th class="tabular">Base</th>
-            <th class="tabular">Bonus</th>
-            <th class="tabular">Deductions</th>
-            <th class="tabular">Total</th>
-            <th style="width: 6rem">Payslip</th>
+            <th scope="col">Employee</th>
+            <th scope="col" class="tabular">Base</th>
+            <th scope="col" class="tabular">Bonus</th>
+            <th scope="col" class="tabular">Deductions</th>
+            <th scope="col" class="tabular">Total</th>
+            <th scope="col" style="width: 6rem">Payslip</th>
             @if (canManage) {
-              <th class="th-actions" style="width: 8rem; text-align: right">Actions</th>
+              <th scope="col" class="th-actions" style="width: 8rem; text-align: right">Actions</th>
             }
           </tr>
         </ng-template>
@@ -106,19 +106,19 @@
       <table class="payslip__table">
         <tbody>
           <tr>
-            <th>Base salary</th>
+            <th scope="col">Base salary</th>
             <td>{{ payslip.baseSalary | number: '1.2-2' }}</td>
           </tr>
           <tr>
-            <th>Bonus</th>
+            <th scope="col">Bonus</th>
             <td>{{ payslip.bonus | number: '1.2-2' }}</td>
           </tr>
           <tr>
-            <th>Deductions</th>
+            <th scope="col">Deductions</th>
             <td>{{ payslip.deductions | number: '1.2-2' }}</td>
           </tr>
           <tr class="payslip__total">
-            <th>Net total</th>
+            <th scope="col">Net total</th>
             <td>{{ payslip.totalSalary | number: '1.2-2' }}</td>
           </tr>
         </tbody>
@@ -130,3 +130,4 @@
     <p-button label="Print" icon="pi pi-print" severity="success" (onClick)="printPayslip()" />
   </ng-template>
 </p-dialog>
+

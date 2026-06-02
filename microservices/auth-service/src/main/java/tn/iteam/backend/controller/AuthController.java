@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import tn.iteam.common.openapi.OpenApiExamples;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tn.iteam.backend.dto.LoginResponse;
+import tn.iteam.backend.dto.SessionResponse;
 import tn.iteam.backend.service.AuthService;
+import tn.iteam.common.openapi.OpenApiExamples;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,14 +36,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Authenticate user", description = "Returns access + refresh tokens and sets HttpOnly cookies")
+    @Operation(summary = "Authenticate user", description = "Sets HttpOnly JWT cookies; returns user profile only")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Authenticated",
-                    content = @Content(schema = @Schema(implementation = LoginResponse.class),
-                            examples = @ExampleObject(value = OpenApiExamples.LOGIN_RESPONSE))),
+                    content = @Content(schema = @Schema(implementation = SessionResponse.class))),
             @ApiResponse(responseCode = "401", description = "Invalid credentials")
     })
-    public ResponseEntity<LoginResponse> login(
+    public ResponseEntity<SessionResponse> login(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(examples = @ExampleObject(value = OpenApiExamples.LOGIN_REQUEST)))
             @RequestBody Map<String, String> body,
@@ -54,13 +54,13 @@ public class AuthController {
         }
         LoginResponse login = authService.login(username, password);
         attachCookies(response, login);
-        return ResponseEntity.ok(login);
+        return ResponseEntity.ok(toSession(login));
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "Refresh access token", description = "Rotates refresh token; uses cookie or body")
+    @Operation(summary = "Refresh access token", description = "Rotates refresh token via HttpOnly cookie")
     @ApiResponse(responseCode = "200", description = "New token pair issued")
-    public ResponseEntity<LoginResponse> refresh(
+    public ResponseEntity<SessionResponse> refresh(
             @RequestBody(required = false) Map<String, String> body,
             @CookieValue(name = "refresh_token", required = false) String refreshCookie,
             HttpServletResponse response
@@ -71,25 +71,42 @@ public class AuthController {
         }
         LoginResponse login = authService.refresh(refreshToken);
         attachCookies(response, login);
-        return ResponseEntity.ok(login);
+        return ResponseEntity.ok(toSession(login));
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "Logout", description = "Clears HttpOnly auth cookies")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        clearCookie(response, "access_token");
+        clearCookie(response, "refresh_token");
+        return ResponseEntity.noContent().build();
+    }
+
+    private SessionResponse toSession(LoginResponse login) {
+        return new SessionResponse(
+                login.userId(),
+                login.username(),
+                login.fullName(),
+                login.role()
+        );
     }
 
     private void attachCookies(HttpServletResponse response, LoginResponse login) {
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", login.token())
+        response.addHeader("Set-Cookie", buildCookie("access_token", login.token(), 86400).toString());
+        response.addHeader("Set-Cookie", buildCookie("refresh_token", login.refreshToken(), 604800).toString());
+    }
+
+    private void clearCookie(HttpServletResponse response, String name) {
+        response.addHeader("Set-Cookie", buildCookie(name, "", 0).toString());
+    }
+
+    private ResponseCookie buildCookie(String name, String value, long maxAgeSeconds) {
+        return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(secureCookie)
                 .path("/")
                 .sameSite("Lax")
-                .maxAge(86400)
+                .maxAge(maxAgeSeconds)
                 .build();
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", login.refreshToken())
-                .httpOnly(true)
-                .secure(secureCookie)
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(604800)
-                .build();
-        response.addHeader("Set-Cookie", accessCookie.toString());
-        response.addHeader("Set-Cookie", refreshCookie.toString());
     }
 }

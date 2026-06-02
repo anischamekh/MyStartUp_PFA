@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
   <div class="page__head">
     <div>
       <h2 class="page__title">Teams</h2>
@@ -34,18 +34,18 @@
                 pInputText
                 type="text"
                 (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-                placeholder="Search team name, speciality, leader…"
+                placeholder="Search team name, speciality, leaderâ€¦"
               />
             </p-iconfield>
           </div>
         </ng-template>
         <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="name">Team <p-sortIcon field="name" /></th>
-            <th pSortableColumn="speciality">Speciality <p-sortIcon field="speciality" /></th>
-            <th>Leader</th>
+            <th scope="col" pSortableColumn="name">Team <p-sortIcon field="name" /></th>
+            <th scope="col" pSortableColumn="speciality">Speciality <p-sortIcon field="speciality" /></th>
+            <th scope="col">Leader</th>
             @if (!auth.viewOnlyAdmin()) {
-              <th class="th-actions" style="width: 10rem; text-align: right">Actions</th>
+              <th scope="col" class="th-actions" style="width: 10rem; text-align: right">Actions</th>
             }
           </tr>
         </ng-template>
@@ -53,7 +53,7 @@
           <tr>
             <td class="cell-title">{{ t.name }}</td>
             <td>{{ specialityLabel(t.speciality) }}</td>
-            <td>{{ t.teamLeaderName || t.teamLeader?.fullName || t.teamLeader?.username || '—' }}</td>
+            <td>{{ t.teamLeaderName || t.teamLeader?.fullName || t.teamLeader?.username || 'â€”' }}</td>
             @if (!auth.viewOnlyAdmin()) {
               <td class="td-actions">
                 <p-button
@@ -145,3 +145,4 @@
     <p-button label="Delete" icon="pi pi-trash" severity="danger" (onClick)="confirmDelete()" />
   </ng-template>
 </p-dialog>
+

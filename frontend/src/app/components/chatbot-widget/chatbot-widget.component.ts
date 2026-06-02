@@ -23,7 +23,7 @@ import { loadStoredMessages, loadUnreadCount, saveStoredMessages, saveUnreadCoun
 export class ChatbotWidgetComponent implements OnInit, AfterViewChecked {
   private readonly chatbot = inject(ChatbotService);
 
-  @ViewChild('messagesEl') private messagesEl?: ElementRef<HTMLDivElement>;
+  @ViewChild('messagesEl') private readonly messagesEl?: ElementRef<HTMLDivElement>;
 
   readonly open = signal(false);
   readonly loading = signal(false);

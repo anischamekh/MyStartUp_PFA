@@ -1,4 +1,6 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from './services/auth.service';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -26,6 +28,12 @@ export const appConfig: ApplicationConfig = {
       }
     }),
     MessageService,
-    ConfirmationService
+    ConfirmationService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (auth: AuthService) => () => firstValueFrom(auth.restoreSession()),
+      deps: [AuthService],
+      multi: true
+    }
   ]
 };

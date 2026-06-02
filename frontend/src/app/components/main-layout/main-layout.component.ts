@@ -91,8 +91,9 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    this.auth.logout();
-    void this.router.navigateByUrl('/login');
+    this.auth.logout().subscribe({
+      complete: () => void this.router.navigateByUrl('/login')
+    });
   }
 
   toggleSidebar(): void {

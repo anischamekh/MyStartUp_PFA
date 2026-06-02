@@ -149,10 +149,9 @@ mvn test
 
 ## Documentation
 
-See `docs/` for:
+**Full technical report (Markdown + PDF export):** [docs/README.md](docs/README.md)
 
-- Architecture, microservices, class, sequence, and use-case diagrams
-- API documentation index
+Includes architecture, technologies, microservices, **269-class Java reference**, API catalog, databases, Kafka/Redis, Docker/K8s, monitoring, interview Q&A, and oral defense guide.
 
 ## Preserved business rules
 

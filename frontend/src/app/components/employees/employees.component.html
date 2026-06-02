@@ -1,4 +1,4 @@
-<p-card header="Employees">
+﻿<p-card header="Employees">
   <div class="emp-toolbar">
     @if (!auth.viewOnlyAdmin()) {
       <p-button label="Add employee" icon="pi pi-user-plus" severity="success" (onClick)="openNew()" />
@@ -16,7 +16,7 @@
   </div>
 
   @if (loading) {
-    <p>Loading…</p>
+    <p>Loadingâ€¦</p>
   } @else {
     <p-table
       #et
@@ -41,13 +41,13 @@
       </ng-template>
       <ng-template pTemplate="header">
         <tr>
-          <th pSortableColumn="fullName">Name</th>
-          <th pSortableColumn="role.name">Role</th>
-          <th>Team</th>
-          <th>Speciality</th>
-          <th pSortableColumn="email">Email</th>
+          <th scope="col" pSortableColumn="fullName">Name</th>
+          <th scope="col" pSortableColumn="role.name">Role</th>
+          <th scope="col">Team</th>
+          <th scope="col">Speciality</th>
+          <th scope="col" pSortableColumn="email">Email</th>
           @if (!auth.viewOnlyAdmin()) {
-            <th class="th-actions" style="width: 10rem; text-align: right">Actions</th>
+            <th scope="col" class="th-actions" style="width: 10rem; text-align: right">Actions</th>
           }
         </tr>
       </ng-template>
@@ -55,8 +55,8 @@
         <tr>
           <td>{{ u.fullName }}</td>
           <td><p-tag [value]="u.role.name" severity="info" /></td>
-          <td>{{ u.employeeProfile?.team?.name ?? u.teamName ?? '—' }}</td>
-          <td>{{ u.employeeProfile?.speciality ?? '—' }}</td>
+          <td>{{ u.employeeProfile?.team?.name ?? u.teamName ?? 'â€”' }}</td>
+          <td>{{ u.employeeProfile?.speciality ?? 'â€”' }}</td>
           <td>{{ u.email }}</td>
           @if (!auth.viewOnlyAdmin()) {
             <td class="td-actions">
@@ -214,3 +214,4 @@
     <p-button label="Delete" icon="pi pi-trash" severity="danger" (onClick)="confirmDelete()" />
   </ng-template>
 </p-dialog>
+

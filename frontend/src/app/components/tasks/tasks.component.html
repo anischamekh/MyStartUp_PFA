@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
   <div class="page__head">
     <div>
       <h2 class="page__title">Tasks</h2>
@@ -43,20 +43,20 @@
                 pInputText
                 type="text"
                 (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-                placeholder="Search tasks, status, assignee…"
+                placeholder="Search tasks, status, assigneeâ€¦"
               />
             </p-iconfield>
           </div>
         </ng-template>
         <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="title">Title <p-sortIcon field="title" /></th>
-            <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
-            <th pSortableColumn="priority">Priority <p-sortIcon field="priority" /></th>
-            <th>Progress</th>
-            <th class="tabular">Est. h</th>
-            <th>Assignee</th>
-            <th class="th-actions" style="width: 12rem; text-align: right">Actions</th>
+            <th scope="col" pSortableColumn="title">Title <p-sortIcon field="title" /></th>
+            <th scope="col" pSortableColumn="status">Status <p-sortIcon field="status" /></th>
+            <th scope="col" pSortableColumn="priority">Priority <p-sortIcon field="priority" /></th>
+            <th scope="col">Progress</th>
+            <th scope="col" class="tabular">Est. h</th>
+            <th scope="col">Assignee</th>
+            <th scope="col" class="th-actions" style="width: 12rem; text-align: right">Actions</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-t>
@@ -77,8 +77,8 @@
               <p-progressBar [value]="t.progress ?? 0" [showValue]="false" [style]="{ height: '8px' }" />
               <span class="cell-muted">{{ t.progress ?? 0 }}%</span>
             </td>
-            <td class="tabular">{{ t.estimatedHours ?? '—' }}</td>
-            <td>{{ t.assignedTo?.fullName || t.assignedTo?.username || '—' }}</td>
+            <td class="tabular">{{ t.estimatedHours ?? 'â€”' }}</td>
+            <td>{{ t.assignedTo?.fullName || t.assignedTo?.username || 'â€”' }}</td>
             <td class="td-actions">
               @if (!isLeader && !auth.viewOnlyAdmin()) {
                 <p-button
@@ -244,3 +244,4 @@
     <p-button label="Delete" icon="pi pi-trash" severity="danger" (onClick)="confirmDelete()" />
   </ng-template>
 </p-dialog>
+

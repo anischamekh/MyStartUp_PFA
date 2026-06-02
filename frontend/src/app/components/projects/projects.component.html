@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
   <div class="page__head">
     <div>
       <h2 class="page__title">Projects</h2>
@@ -40,21 +40,21 @@
                 pInputText
                 type="text"
                 (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-                placeholder="Search projects…"
+                placeholder="Search projectsâ€¦"
               />
             </p-iconfield>
           </div>
         </ng-template>
         <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="name">Name <p-sortIcon field="name" /></th>
-            <th>Teams</th>
-            <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
-            <th pSortableColumn="progress">Progress <p-sortIcon field="progress" /></th>
-            <th pSortableColumn="startDate">Start <p-sortIcon field="startDate" /></th>
-            <th pSortableColumn="endDate">End <p-sortIcon field="endDate" /></th>
+            <th scope="col" pSortableColumn="name">Name <p-sortIcon field="name" /></th>
+            <th scope="col">Teams</th>
+            <th scope="col" pSortableColumn="status">Status <p-sortIcon field="status" /></th>
+            <th scope="col" pSortableColumn="progress">Progress <p-sortIcon field="progress" /></th>
+            <th scope="col" pSortableColumn="startDate">Start <p-sortIcon field="startDate" /></th>
+            <th scope="col" pSortableColumn="endDate">End <p-sortIcon field="endDate" /></th>
             @if (!readOnly) {
-              <th style="width: 5rem">Actions</th>
+              <th scope="col" style="width: 5rem">Actions</th>
             }
           </tr>
         </ng-template>
@@ -173,3 +173,4 @@
     <p-button label="Save" icon="pi pi-check" severity="success" (onClick)="save()" />
   </ng-template>
 </p-dialog>
+

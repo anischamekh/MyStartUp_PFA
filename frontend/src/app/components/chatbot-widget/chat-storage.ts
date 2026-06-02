@@ -25,7 +25,7 @@ export function saveStoredMessages(messages: ChatMessageDto[]): void {
 export function loadUnreadCount(): number {
   try {
     const raw = localStorage.getItem(UNREAD_KEY);
-    return raw ? Math.max(0, parseInt(raw, 10) || 0) : 0;
+    return raw ? Math.max(0, Number.parseInt(raw, 10) || 0) : 0;
   } catch {
     return 0;
   }
