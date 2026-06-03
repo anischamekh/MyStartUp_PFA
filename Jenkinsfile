@@ -31,7 +31,11 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarCloud') {
                     dir('microservices') {
-                        sh 'mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.token=$SONAR_TOKEN'
+                        sh '''
+                          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                            -Dsonar.token=$SONAR_TOKEN \
+                            -Dsonar.coverage.jacoco.xmlReportPaths=common-lib/target/site/jacoco/jacoco.xml,auth-service/target/site/jacoco/jacoco.xml,hrm-service/target/site/jacoco/jacoco.xml,project-service/target/site/jacoco/jacoco.xml,chatbot-service/target/site/jacoco/jacoco.xml
+                        '''
                     }
                 }
             }

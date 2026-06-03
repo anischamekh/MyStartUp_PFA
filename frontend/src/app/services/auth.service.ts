@@ -1,7 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { ApiService } from './api.service';
-import type { User } from '../models/user.model';
 import type { RoleName } from '../models/role-name.model';
 
 export interface SessionUser {
@@ -11,6 +10,11 @@ export interface SessionUser {
   role: RoleName;
 }
 
+/** API login/refresh payload (accessToken kept in memory only, not localStorage). */
+interface SessionResponseDto extends SessionUser {
+  accessToken?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly api = inject(ApiService);
@@ -18,6 +22,13 @@ export class AuthService {
   private readonly _auth$ = new BehaviorSubject<SessionUser | null>(null);
   readonly auth$ = this._auth$.asObservable();
   private refreshInFlight: Observable<SessionUser | null> | null = null;
+
+  /** In-memory access token for Authorization header (complements HttpOnly cookies). */
+  private accessToken: string | null = null;
+
+  get token(): string | null {
+    return this.accessToken;
+  }
 
   get role(): RoleName | null {
     return this._auth$.value?.role ?? null;
@@ -32,18 +43,17 @@ export class AuthService {
   }
 
   get isLoggedIn(): boolean {
-    return !!this._auth$.value;
+    return !!this._auth$.value && !!this.accessToken;
   }
 
-  /** Restore session from HttpOnly cookies (no localStorage). */
   restoreSession() {
     return this.api.client
-      .get<User>(`${this.api.baseUrl}/users/me`, { withCredentials: true })
+      .post<SessionResponseDto>(`${this.api.baseUrl}/auth/refresh`, {}, { withCredentials: true })
       .pipe(
-        map((u) => this.toSessionUser(u)),
+        map((dto) => this.applySessionDto(dto)),
         tap((user) => this._auth$.next(user)),
         catchError(() => {
-          this._auth$.next(null);
+          this.clearSession();
           return of(null);
         })
       );
@@ -51,8 +61,15 @@ export class AuthService {
 
   login(username: string, password: string) {
     return this.api.client
-      .post<SessionUser>(`${this.api.baseUrl}/auth/login`, { username, password }, { withCredentials: true })
-      .pipe(tap((user) => this._auth$.next(user)));
+      .post<SessionResponseDto>(
+        `${this.api.baseUrl}/auth/login`,
+        { username, password },
+        { withCredentials: true }
+      )
+      .pipe(
+        map((dto) => this.applySessionDto(dto)),
+        tap((user) => this._auth$.next(user))
+      );
   }
 
   refreshSession() {
@@ -60,11 +77,12 @@ export class AuthService {
       return this.refreshInFlight;
     }
     this.refreshInFlight = this.api.client
-      .post<SessionUser>(`${this.api.baseUrl}/auth/refresh`, {}, { withCredentials: true })
+      .post<SessionResponseDto>(`${this.api.baseUrl}/auth/refresh`, {}, { withCredentials: true })
       .pipe(
+        map((dto) => this.applySessionDto(dto)),
         tap((user) => this._auth$.next(user)),
         catchError(() => {
-          this._auth$.next(null);
+          this.clearSession();
           return of(null);
         }),
         finalize(() => {
@@ -79,9 +97,9 @@ export class AuthService {
     return this.api.client
       .post(`${this.api.baseUrl}/auth/logout`, {}, { withCredentials: true })
       .pipe(
-        tap(() => this._auth$.next(null)),
+        tap(() => this.clearSession()),
         catchError(() => {
-          this._auth$.next(null);
+          this.clearSession();
           return of(null);
         })
       );
@@ -91,12 +109,18 @@ export class AuthService {
     return this.auth$.pipe(map((a) => !!a && roles.includes(a.role)));
   }
 
-  private toSessionUser(u: User): SessionUser {
+  private applySessionDto(dto: SessionResponseDto): SessionUser {
+    this.accessToken = dto.accessToken ?? null;
     return {
-      userId: u.id ?? 0,
-      username: u.username,
-      fullName: u.fullName,
-      role: u.role.name
+      userId: dto.userId,
+      username: dto.username,
+      fullName: dto.fullName,
+      role: dto.role
     };
+  }
+
+  private clearSession(): void {
+    this.accessToken = null;
+    this._auth$.next(null);
   }
 }

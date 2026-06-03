@@ -32,6 +32,13 @@ public class OllamaClient {
         this.restClient = RestClient.builder().baseUrl(normalized).build();
     }
 
+    /** Package-visible for unit tests with {@link org.springframework.test.web.client.MockRestServiceServer}. */
+    OllamaClient(RestClient restClient, ObjectMapper objectMapper, String model) {
+        this.restClient = restClient;
+        this.objectMapper = objectMapper;
+        this.model = model;
+    }
+
     public String ask(String systemPrompt, String userMessage) {
         ObjectNode body = objectMapper.createObjectNode();
         body.put("model", model);

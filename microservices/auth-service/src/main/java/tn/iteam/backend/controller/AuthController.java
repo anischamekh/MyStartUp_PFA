@@ -87,7 +87,8 @@ public class AuthController {
                 login.userId(),
                 login.username(),
                 login.fullName(),
-                login.role()
+                login.role(),
+                login.token()
         );
     }
 

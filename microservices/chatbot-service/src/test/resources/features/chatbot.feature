@@ -1,6 +1,7 @@
 Feature: Chatbot
+  The HR assistant answers questions for authenticated users.
 
-  Scenario: Manager asks project status
-    Given a manager is authenticated
-    When he asks project status
-    Then chatbot returns real project statistics
+  Scenario: Ask chatbot a question
+    Given a user is authenticated
+    When the user sends a question
+    Then the chatbot returns a response

@@ -2,6 +2,7 @@ package tn.iteam.backend.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import tn.iteam.backend.dto.LoginResponse;
+import tn.iteam.backend.exception.BusinessException;
 import tn.iteam.backend.entity.Role;
 import tn.iteam.backend.entity.RoleName;
 import tn.iteam.backend.repository.UserRepository;
@@ -74,5 +76,10 @@ class AuthServiceImplTest {
         assertNotNull(response.refreshToken());
         assertEquals("john", response.username());
         assertEquals("EMPLOYEE", response.role());
+    }
+
+    @Test
+    void refresh_withInvalidToken_throws() {
+        assertThrows(BusinessException.class, () -> authService.refresh("not-a-valid-jwt"));
     }
 }

@@ -40,6 +40,18 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
+  # Kafka is a binary broker, not HTTP. Use this UI instead of opening http://localhost:9092 in a browser.
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - kafka
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+
   auth-service:
     build:
       context: ./microservices

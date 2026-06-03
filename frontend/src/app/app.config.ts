@@ -31,7 +31,8 @@ export const appConfig: ApplicationConfig = {
     ConfirmationService,
     {
       provide: APP_INITIALIZER,
-      useFactory: (auth: AuthService) => () => firstValueFrom(auth.restoreSession()),
+      useFactory: (auth: AuthService) => () =>
+        firstValueFrom(auth.restoreSession()).catch(() => null),
       deps: [AuthService],
       multi: true
     }
