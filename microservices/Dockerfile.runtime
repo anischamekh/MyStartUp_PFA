@@ -10,7 +10,20 @@ COPY auth-service ./auth-service
 COPY hrm-service ./hrm-service
 COPY project-service ./project-service
 COPY chatbot-service ./chatbot-service
-RUN mvn -q -pl ${SERVICE} -am package -DskipTests
+
+# Retry Maven on transient Central download errors (common when building several services in parallel).
+RUN set -e; \
+    for attempt in 1 2 3 4; do \
+      echo "Maven package attempt ${attempt} for ${SERVICE}..."; \
+      if mvn -B -pl ${SERVICE} -am package -DskipTests; then \
+        echo "Build succeeded on attempt ${attempt}"; \
+        exit 0; \
+      fi; \
+      echo "Attempt ${attempt} failed, waiting before retry..."; \
+      sleep 20; \
+    done; \
+    echo "Maven build failed after 4 attempts"; \
+    exit 1
 
 FROM eclipse-temurin:17-jre-alpine
 ARG SERVICE

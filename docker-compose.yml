@@ -209,17 +209,42 @@ services:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+    depends_on:
+      - api-gateway
+      - auth-service
+      - hrm-service
+      - project-service
+      - chatbot-service
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   grafana:
     image: grafana/grafana:11.2.0
     ports:
       - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
 
+  # Web UI: http://localhost:8085 — port 50000 is for Jenkins agents (JNLP), not the dashboard.
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: mystartup-jenkins
+    restart: unless-stopped
+    ports:
+      - "8085:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=true"
+
 volumes:
   postgres_data:
   hrm-uploads:
   ollama_data:
+  jenkins_home:

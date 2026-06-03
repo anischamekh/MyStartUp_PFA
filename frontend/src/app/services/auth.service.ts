@@ -42,8 +42,13 @@ export class AuthService {
     return this.role === 'ADMIN';
   }
 
+  /** True when user profile is loaded (token may come from JSON or HttpOnly cookie via gateway). */
   get isLoggedIn(): boolean {
-    return !!this._auth$.value && !!this.accessToken;
+    return !!this._auth$.value;
+  }
+
+  get hasAccessToken(): boolean {
+    return !!this.accessToken;
   }
 
   restoreSession() {
@@ -110,7 +115,8 @@ export class AuthService {
   }
 
   private applySessionDto(dto: SessionResponseDto): SessionUser {
-    this.accessToken = dto.accessToken ?? null;
+    const raw = dto as SessionResponseDto & { token?: string };
+    this.accessToken = dto.accessToken ?? raw.token ?? null;
     return {
       userId: dto.userId,
       username: dto.username,

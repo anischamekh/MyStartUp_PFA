@@ -63,8 +63,8 @@ Sonar coverage inclusions: `**/service/**`, `**/security/**`, `**/common/securit
 
 | Item | Value |
 |------|--------|
-| Dashboard URL (local Docker) | http://localhost:8080 |
-| Port | 8080 |
+| Dashboard URL (local Docker) | http://localhost:8085 |
+| Port | 8085 (map `8085:8080`) |
 | Container name (recommended) | `mystartup-jenkins` |
 | Setup guide | `docs/JENKINS_SETUP.md` |
 | Pipeline | Root `Jenkinsfile` — checkout → `mvn verify` → Sonar → frontend build → Docker push on `main` |

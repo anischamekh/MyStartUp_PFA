@@ -83,4 +83,16 @@ class ChatServiceTest {
         List<String> suggestions = chatService.suggestions();
         assertTrue(suggestions.stream().anyMatch(s -> s.contains("System overview")));
     }
+
+    @Test
+    void suggestions_forManagerRole() {
+        when(securityContextHelper.currentRole()).thenReturn("MANAGER");
+        assertTrue(chatService.suggestions().stream().anyMatch(s -> s.contains("project")));
+    }
+
+    @Test
+    void suggestions_forHrRole() {
+        when(securityContextHelper.currentRole()).thenReturn("HR");
+        assertTrue(chatService.suggestions().stream().anyMatch(s -> s.contains("Employee")));
+    }
 }

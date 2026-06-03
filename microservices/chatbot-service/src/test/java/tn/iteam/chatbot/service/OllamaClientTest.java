@@ -29,7 +29,19 @@ class OllamaClientTest {
 
     @AfterEach
     void tearDown() {
-        server.reset();
+        if (server != null) {
+            server.reset();
+        }
+    }
+
+    @Test
+    void ask_returnsUnavailableMessageOnConnectionFailure() {
+        OllamaClient offline = new OllamaClient(
+                RestClient.builder().baseUrl("http://127.0.0.1:1").build(),
+                new ObjectMapper(),
+                "llama3.2");
+        String answer = offline.ask("system", "Hi");
+        assertTrue(answer.contains("unavailable"));
     }
 
     @Test
@@ -40,8 +52,7 @@ class OllamaClientTest {
                         "{\"message\":{\"content\":\"3 active projects\"}}",
                         MediaType.APPLICATION_JSON));
 
-        String answer = client.ask("system", "How many projects?");
-        assertEquals("3 active projects", answer);
+        assertEquals("3 active projects", client.ask("system", "How many projects?"));
         server.verify();
     }
 
@@ -51,14 +62,6 @@ class OllamaClientTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-        String answer = client.ask("system", "Hi");
-        assertEquals("I could not generate an answer from the available data.", answer);
-    }
-
-    @Test
-    void ask_returnsUnavailableMessageOnConnectionFailure() {
-        OllamaClient offline = new OllamaClient("http://127.0.0.1:1", "llama3.2", new ObjectMapper());
-        String answer = offline.ask("system", "Hi");
-        assertTrue(answer.contains("unavailable"));
+        assertEquals("I could not generate an answer from the available data.", client.ask("system", "Hi"));
     }
 }

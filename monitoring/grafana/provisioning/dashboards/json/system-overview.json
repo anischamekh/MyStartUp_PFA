@@ -1,19 +1,42 @@
 {
   "title": "MyStartUp System Overview",
+  "uid": "mystartup-system",
   "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
   "panels": [
+    {
+      "type": "stat",
+      "title": "Targets Up",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(up{job=~\"api-gateway|auth-service|hrm-service|project-service|chatbot-service\"})",
+          "legendFormat": "up"
+        }
+      ]
+    },
     {
       "type": "timeseries",
       "title": "HTTP Request Rate",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count[1m])) by (application)" }]
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{job=~\"api-gateway|auth-service|hrm-service|project-service|chatbot-service\"}[1m])) by (job)",
+          "legendFormat": "{{job}}"
+        }
+      ]
     },
     {
       "type": "timeseries",
       "title": "JVM Memory Used",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-      "targets": [{ "expr": "sum(jvm_memory_used_bytes) by (application)" }]
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum(jvm_memory_used_bytes{job=~\"api-gateway|auth-service|hrm-service|project-service|chatbot-service\"}) by (job)",
+          "legendFormat": "{{job}}"
+        }
+      ]
     }
-  ],
-  "schemaVersion": 39
+  ]
 }

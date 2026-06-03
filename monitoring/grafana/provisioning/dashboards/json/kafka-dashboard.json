@@ -1,12 +1,39 @@
 {
   "title": "MyStartUp Kafka Events",
+  "uid": "mystartup-kafka",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
   "panels": [
     {
+      "type": "stat",
+      "title": "Services Up",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "count(up{job=~\"auth-service|hrm-service|project-service|chatbot-service\"} == 1)", "legendFormat": "up" }
+      ]
+    },
+    {
       "type": "timeseries",
-      "title": "Kafka broker up",
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
-      "targets": [{ "expr": "kafka_server_replicamanager_leadercount" }]
+      "title": "Kafka producer sends (Spring apps)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_producer_record_send_total{job=~\"auth-service|hrm-service|project-service|chatbot-service\"}[5m])) by (job)",
+          "legendFormat": "{{job}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Kafka consumer records consumed",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_consumer_fetch_manager_records_consumed_total{job=~\"hrm-service|project-service\"}[5m])) by (job)",
+          "legendFormat": "{{job}}"
+        }
+      ]
     }
-  ],
-  "schemaVersion": 39
+  ]
 }

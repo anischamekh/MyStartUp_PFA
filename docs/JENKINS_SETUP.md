@@ -1,42 +1,48 @@
-# Jenkins local setup (Docker)
+# Jenkins — conteneur `mystartup-jenkins`
 
-Jenkins is not bundled in this repository; use Docker for a local CI dashboard.
+## Accès (dashboard web)
 
-## URL and port
+| Élément | Valeur |
+|---------|--------|
+| **URL** | **http://localhost:8085** |
+| **Port hôte → conteneur** | `8085:8080` (Jenkins écoute sur **8080** dans le conteneur) |
+| **Nom du conteneur** | `mystartup-jenkins` |
+| **Fichier** | `docker-compose.yml` (service `jenkins`) |
 
-| Item | Value |
-|------|--------|
-| Dashboard URL | http://localhost:8080 |
-| Port | **8080** (host) |
-| Container name | `mystartup-jenkins` (recommended) |
+> **Ne pas ouvrir** http://localhost:50000/ pour l’interface : le port **50000** sert aux **agents Jenkins** (protocole JNLP), pas au navigateur.
 
-## Start Jenkins with Docker
+## Démarrage
 
 ```powershell
-docker volume create jenkins_home
-docker run -d --name mystartup-jenkins -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts-jdk17
+cd C:\Users\eswatini\Documents\MyStartUp_PFA
+docker compose up -d jenkins
 ```
 
-Initial admin password:
+Vérifier :
+
+```powershell
+docker ps --filter name=mystartup-jenkins
+docker logs mystartup-jenkins --tail 30
+```
+
+## Premier accès
+
+1. Ouvrir **http://localhost:8085**
+2. Mot de passe initial :
 
 ```powershell
 docker exec mystartup-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
-## Pipeline job
+3. Assistant d’installation → plugins → utilisateur admin.
 
-1. Install plugins: **Pipeline**, **SonarQube Scanner**, **JUnit**, **Git**.
-2. Add SonarCloud credential `SonarCloud` (secret token) for the Jenkinsfile `withSonarQubeEnv('SonarCloud')` block.
-3. Create a **Pipeline** job pointing at this repo’s root `Jenkinsfile`.
-4. Mount Docker socket if the pipeline must run `docker compose` (Linux example):
+## Pipeline
 
-   ```bash
-   docker run ... -v /var/run/docker.sock:/var/run/docker.sock ...
-   ```
+- Script : `Jenkinsfile` à la racine du dépôt.
+- Credential SonarCloud : ID `SonarCloud` (comme dans le Jenkinsfile).
 
-## Stop / remove
+## Arrêt
 
 ```powershell
-docker stop mystartup-jenkins
-docker rm mystartup-jenkins
+docker compose stop jenkins
 ```

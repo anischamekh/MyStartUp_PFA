@@ -49,8 +49,15 @@ export class LoginComponent {
     }
     this.loading = true;
     this.auth.login(this.username, this.password).subscribe({
-      next: () => {
+      next: (user) => {
         this.loading = false;
+        if (!user || !this.auth.isLoggedIn) {
+          this.notify.show(
+            'error',
+            'Login succeeded but session was not established. Rebuild auth-service and api-gateway, then try again.'
+          );
+          return;
+        }
         void this.router.navigateByUrl('/dashboard');
       },
       error: (err) => {

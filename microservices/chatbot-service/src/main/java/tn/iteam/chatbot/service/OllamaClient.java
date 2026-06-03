@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -21,20 +23,13 @@ public class OllamaClient {
     private final ObjectMapper objectMapper;
     private final String model;
 
+    @Autowired
     public OllamaClient(
-            @Value("${app.ollama.base-url}") String baseUrl,
-            @Value("${app.ollama.model}") String model,
-            ObjectMapper objectMapper
+            @Qualifier("ollamaRestClient") RestClient ollamaRestClient,
+            ObjectMapper objectMapper,
+            @Value("${app.ollama.model}") String model
     ) {
-        this.objectMapper = objectMapper;
-        this.model = model;
-        String normalized = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
-        this.restClient = RestClient.builder().baseUrl(normalized).build();
-    }
-
-    /** Package-visible for unit tests with {@link org.springframework.test.web.client.MockRestServiceServer}. */
-    OllamaClient(RestClient restClient, ObjectMapper objectMapper, String model) {
-        this.restClient = restClient;
+        this.restClient = ollamaRestClient;
         this.objectMapper = objectMapper;
         this.model = model;
     }
