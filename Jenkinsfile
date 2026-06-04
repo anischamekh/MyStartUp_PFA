@@ -35,7 +35,7 @@ pipeline {
                             mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                               -Dsonar.organization=anischamekh \
                               -Dsonar.projectKey=anischamekh_MyStartUp_PFA \
-                              -Dsonar.coverage.jacoco.xmlReportPaths=common-lib/target/site/jacoco/jacoco.xml,auth-service/target/site/jacoco/jacoco.xml,hrm-service/target/site/jacoco/jacoco.xml,project-service/target/site/jacoco/jacoco.xml,chatbot-service/target/site/jacoco/jacoco.xml
+                              -Dsonar.coverage.jacoco.xmlReportPaths=common-lib/target/site/jacoco/jacoco.xml,auth-service/target/site/jacoco/jacoco.xml,hrm-service/target/site/jacoco/jacoco.xml,project-service/target/site/jacoco/jacoco.xml,chatbot-service/target/site/jacoco/jacoco.xml,api-gateway/target/site/jacoco/jacoco.xml
                         '''
                     }
                 }

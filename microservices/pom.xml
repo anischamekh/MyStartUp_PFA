@@ -42,7 +42,8 @@
             ${project.basedir}/auth-service/target/site/jacoco/jacoco.xml,
             ${project.basedir}/hrm-service/target/site/jacoco/jacoco.xml,
             ${project.basedir}/project-service/target/site/jacoco/jacoco.xml,
-            ${project.basedir}/chatbot-service/target/site/jacoco/jacoco.xml
+            ${project.basedir}/chatbot-service/target/site/jacoco/jacoco.xml,
+            ${project.basedir}/api-gateway/target/site/jacoco/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.organization>anischamekh</sonar.organization>
         <sonar.projectKey>anischamekh_MyStartUp_PFA</sonar.projectKey>

@@ -2,8 +2,11 @@ package tn.iteam.backend.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,5 +47,58 @@ class SkillServiceImplAuthTest {
         emp.setRole(role);
         when(currentUserProvider.requireCurrentUser()).thenReturn(emp);
         assertThrows(BusinessException.class, () -> skillService.save(new Skill()));
+    }
+
+    @Test
+    void findAll_delegatesToRepository() {
+        when(skillRepository.findAll()).thenReturn(List.of());
+        assertEquals(0, skillService.findAll().size());
+    }
+
+    @Test
+    void findById_notFound() {
+        when(skillRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(BusinessException.class, () -> skillService.findById(99L));
+    }
+
+    @Test
+    void save_hrSuccess_trimsName() {
+        User hr = new User();
+        Role role = new Role();
+        role.setName(RoleName.HR);
+        hr.setRole(role);
+        when(currentUserProvider.requireCurrentUser()).thenReturn(hr);
+        Skill input = new Skill();
+        input.setName("  Java  ");
+        when(skillRepository.findByNameIgnoreCase("Java")).thenReturn(Optional.empty());
+        when(skillRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Skill saved = skillService.save(input);
+
+        assertEquals("Java", saved.getName());
+        verify(skillRepository).save(any());
+    }
+
+    @Test
+    void save_rejectsBlankName() {
+        User hr = new User();
+        Role role = new Role();
+        role.setName(RoleName.HR);
+        hr.setRole(role);
+        when(currentUserProvider.requireCurrentUser()).thenReturn(hr);
+        Skill input = new Skill();
+        input.setName("  ");
+        assertThrows(BusinessException.class, () -> skillService.save(input));
+    }
+
+    @Test
+    void delete_hrCanDelete() {
+        User hr = new User();
+        Role role = new Role();
+        role.setName(RoleName.HR);
+        hr.setRole(role);
+        when(currentUserProvider.requireCurrentUser()).thenReturn(hr);
+        skillService.delete(3L);
+        verify(skillRepository).deleteById(3L);
     }
 }

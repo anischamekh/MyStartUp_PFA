@@ -95,4 +95,43 @@ class ChatServiceTest {
         when(securityContextHelper.currentRole()).thenReturn("HR");
         assertTrue(chatService.suggestions().stream().anyMatch(s -> s.contains("Employee")));
     }
+
+    @Test
+    void suggestions_forTeamLeaderRole() {
+        when(securityContextHelper.currentRole()).thenReturn("TEAM_LEADER");
+        assertTrue(chatService.suggestions().stream().anyMatch(s -> s.contains("team")));
+    }
+
+    @Test
+    void suggestions_forEmployeeRole() {
+        when(securityContextHelper.currentRole()).thenReturn("EMPLOYEE");
+        assertTrue(chatService.suggestions().stream().anyMatch(s -> s.contains("leave")));
+    }
+
+    @Test
+    void suggestions_nullRole_returnsGenericPrompt() {
+        when(securityContextHelper.currentRole()).thenReturn(null);
+        assertTrue(chatService.suggestions().stream().anyMatch(s -> s.contains("help")));
+    }
+
+    @Test
+    void suggestions_unknownRole_returnsDefaultPrompt() {
+        when(securityContextHelper.currentRole()).thenReturn("GUEST");
+        assertTrue(chatService.suggestions().stream().anyMatch(s -> s.contains("HR or project")));
+    }
+
+    @Test
+    void ask_continuesWhenKafkaPublishFails() {
+        when(securityContextHelper.currentRole()).thenReturn("EMPLOYEE");
+        when(contextDataService.buildContext("token")).thenReturn("ctx");
+        when(promptBuilder.systemPrompt()).thenReturn("system");
+        when(promptBuilder.userMessage("ctx", "hi")).thenReturn("user-msg");
+        when(ollamaClient.ask("system", "user-msg")).thenReturn("raw");
+        when(answerSanitizer.sanitize("raw")).thenReturn("answer");
+        when(kafkaTemplate.send(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new RuntimeException("kafka down"));
+
+        ChatResponse response = chatService.ask("token", "hi", 1L);
+        assertEquals("answer", response.answer());
+    }
 }

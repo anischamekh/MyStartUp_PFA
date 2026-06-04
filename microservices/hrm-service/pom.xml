@@ -120,6 +120,7 @@
                     <excludes combine.children="append">
                         <!-- Multipart/file IO; covered indirectly via controller integration -->
                         <exclude>tn/iteam/backend/service/impl/EmployeeDocumentServiceImpl*</exclude>
+                        <exclude>tn/iteam/backend/security/SecurityConfig*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
