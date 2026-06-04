@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: mystartup/api-gateway:latest
+          image: anischamekh/mystartup-api-gateway:latest
           ports:
             - containerPort: 8080
           envFrom:

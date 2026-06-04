@@ -71,7 +71,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./microservices
-          file: ./microservices/Dockerfile
+          file: ./microservices/Dockerfile.runtime 
           push: true
           build-args: SERVICE=${{ matrix.service }}
           tags: ${{ env.IMAGE_PREFIX }}-${{ matrix.service }}:latest

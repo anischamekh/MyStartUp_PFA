@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: hrm-service
-          image: mystartup/hrm-service:latest
+          image: anischamekh/mystartup-hrm-service:latest
           ports:
             - containerPort: 8082
           envFrom:
