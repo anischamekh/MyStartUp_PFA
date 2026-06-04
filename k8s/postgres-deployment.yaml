@@ -38,13 +38,21 @@ spec:
                 secretKeyRef:
                   name: mystartup-secrets
                   key: DB_PASSWORD
+            - name: POSTGRES_DB
+              value: postgres
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: postgres-pvc
+        - name: init-scripts
+          configMap:
+            name: postgres-init-scripts
 ---
 apiVersion: v1
 kind: Service

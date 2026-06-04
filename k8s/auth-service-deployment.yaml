@@ -12,6 +12,13 @@ spec:
       labels:
         app: auth-service
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - "until nc -z postgres 5432; do echo waiting for postgres; sleep 3; done"
       containers:
         - name: auth-service
           image: anischamekh/mystartup-auth-service:latest
@@ -25,6 +32,25 @@ spec:
           env:
             - name: DB_URL
               value: jdbc:postgresql://postgres:5432/auth_db
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/auth_db
+            - name: APP_INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mystartup-secrets
+                  key: APP_INTERNAL_API_KEY
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 45
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service

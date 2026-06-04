@@ -12,6 +12,10 @@ spec:
       labels:
         app: chatbot-service
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z postgres 5432; do sleep 3; done"]
       containers:
         - name: chatbot-service
           image: anischamekh/mystartup-chatbot-service:latest
@@ -24,6 +28,8 @@ spec:
                 name: mystartup-secrets
           env:
             - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/chatbot_db
+            - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://postgres:5432/chatbot_db
           livenessProbe:
             httpGet:
