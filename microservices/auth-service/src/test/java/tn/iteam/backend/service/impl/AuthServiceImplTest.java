@@ -82,4 +82,32 @@ class AuthServiceImplTest {
     void refresh_withInvalidToken_throws() {
         assertThrows(BusinessException.class, () -> authService.refresh("not-a-valid-jwt"));
     }
+
+    @Test
+    void refresh_withValidActiveToken_returnsNewTokens() {
+        tn.iteam.backend.entity.User entity = new tn.iteam.backend.entity.User();
+        entity.setId(1L);
+        entity.setUsername("john");
+        entity.setPassword("encoded");
+        Role role = new Role();
+        role.setName(RoleName.EMPLOYEE);
+        entity.setRole(role);
+        when(userRepository.findByUsername("john")).thenReturn(Optional.of(entity));
+
+        UserDetails principal = User.withUsername("john")
+                .password("pwd")
+                .authorities(new SimpleGrantedAuthority("EMPLOYEE"))
+                .build();
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities()));
+
+        LoginResponse login = authService.login("john", "pwd");
+        when(refreshTokenService.isActive(login.refreshToken())).thenReturn(true);
+
+        LoginResponse refreshed = authService.refresh(login.refreshToken());
+
+        assertNotNull(refreshed.token());
+        assertNotNull(refreshed.refreshToken());
+        assertEquals("john", refreshed.username());
+    }
 }

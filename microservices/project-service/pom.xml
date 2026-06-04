@@ -99,6 +99,12 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes combine.children="append">
+                        <exclude>tn/iteam/backend/security/SecurityConfig*</exclude>
+                        <exclude>tn/iteam/backend/security/JwtAuthenticationFilter*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>report</id>

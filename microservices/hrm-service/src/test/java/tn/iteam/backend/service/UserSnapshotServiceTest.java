@@ -15,7 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tn.iteam.backend.client.AuthServiceClient;
+import tn.iteam.backend.entity.EmployeeHrData;
 import tn.iteam.backend.entity.UserSnapshot;
+import tn.iteam.backend.repository.EmployeeHrDataRepository;
 import tn.iteam.backend.repository.UserSnapshotRepository;
 import tn.iteam.common.dto.UserSummaryDto;
 import tn.iteam.common.events.EmployeeUpdatedEvent;
@@ -25,6 +27,8 @@ class UserSnapshotServiceTest {
 
     @Mock
     private UserSnapshotRepository userSnapshotRepository;
+    @Mock
+    private EmployeeHrDataRepository employeeHrDataRepository;
     @Mock
     private AuthServiceClient authServiceClient;
 
@@ -37,25 +41,15 @@ class UserSnapshotServiceTest {
     }
 
     @Test
-    void applyEmployeeUpdated_persistsSnapshot() {
+    void applyEmployeeUpdated_persistsSnapshotAndHrData() {
         when(userSnapshotRepository.findById(7L)).thenReturn(Optional.empty());
+        when(employeeHrDataRepository.findById(7L)).thenReturn(Optional.empty());
+
         userSnapshotService.applyEmployeeUpdated(new EmployeeUpdatedEvent(
                 7L, "u", "User", "u@test.com", "EMPLOYEE", 1L, "T", 10, "UPDATED", Instant.now()));
+
         verify(userSnapshotRepository).save(any(UserSnapshot.class));
-    }
-
-    @Test
-    void deleteUser() {
-        userSnapshotService.deleteUser(3L);
-        verify(userSnapshotRepository).deleteById(3L);
-    }
-
-    @Test
-    void findById() {
-        UserSnapshot snap = new UserSnapshot();
-        snap.setId(1L);
-        when(userSnapshotRepository.findById(1L)).thenReturn(Optional.of(snap));
-        assertEquals(1L, userSnapshotService.findById(1L).orElseThrow().getId());
+        verify(employeeHrDataRepository).save(any(EmployeeHrData.class));
     }
 
     @Test
@@ -67,6 +61,13 @@ class UserSnapshotServiceTest {
         UserSnapshot result = userSnapshotService.requireById(12L);
         assertEquals(12L, result.getId());
         verify(userSnapshotRepository).save(any(UserSnapshot.class));
+    }
+
+    @Test
+    void deleteUser_removesHrDataAndSnapshot() {
+        userSnapshotService.deleteUser(3L);
+        verify(employeeHrDataRepository).deleteById(3L);
+        verify(userSnapshotRepository).deleteById(3L);
     }
 
     private static UserSnapshot snapshot(Long id) {

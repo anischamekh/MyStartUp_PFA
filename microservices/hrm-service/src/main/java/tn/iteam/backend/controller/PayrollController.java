@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +58,7 @@ public class PayrollController {
     @PostMapping
     @Operation(summary = "Create payroll", description = "HR only")
     @ApiResponse(responseCode = "200", description = "Created")
+    @PreAuthorize("hasAuthority('HR')")
     public Payroll create(@RequestBody Payroll payroll) {
         return payrollService.save(payroll);
     }
@@ -64,6 +66,7 @@ public class PayrollController {
     @PutMapping("/{id}")
     @Operation(summary = "Update payroll")
     @ApiResponse(responseCode = "200", description = "Updated")
+    @PreAuthorize("hasAuthority('HR')")
     public Payroll update(@Parameter(example = "1") @PathVariable Long id, @RequestBody Payroll payroll) {
         return payrollService.update(id, payroll);
     }
@@ -71,6 +74,7 @@ public class PayrollController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete payroll")
     @ApiResponse(responseCode = "200", description = "Deleted")
+    @PreAuthorize("hasAuthority('HR')")
     public ResponseEntity<?> delete(@Parameter(example = "1") @PathVariable Long id) {
         payrollService.delete(id);
         return ResponseEntity.ok().build();

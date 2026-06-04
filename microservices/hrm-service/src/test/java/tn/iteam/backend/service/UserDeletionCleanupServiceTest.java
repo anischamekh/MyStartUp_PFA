@@ -35,6 +35,13 @@ class UserDeletionCleanupServiceTest {
         service.cleanup(9L);
         verify(leaveRequestRepository).clearManagerForUser(9L);
         verify(leaveRequestRepository).deleteByEmployeeId(9L);
+        verify(notificationRepository).deleteByRecipientUserId(9L);
+        verify(employeeDocumentRepository).deleteAll(org.mockito.ArgumentMatchers.anyList());
+        verify(employeeSkillRepository).deleteByUserId(9L);
+        verify(payrollRepository).deleteByUserId(9L);
+        verify(evaluationRepository).deleteByEmployeeId(9L);
+        verify(evaluationRepository).deleteByEvaluatorId(9L);
+        verify(trainingAttendanceRepository).deleteByUserId(9L);
         verify(userSnapshotService).deleteUser(9L);
     }
 }

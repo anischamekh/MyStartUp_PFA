@@ -24,13 +24,15 @@ spring:
 
 app:
   seed:
-    enabled: ${APP_SEED_ENABLED:true}
+    enabled: ${APP_SEED_ENABLED:false}
+    password: ${APP_SEED_PASSWORD:}
   sync:
     user-events-on-startup: ${APP_SYNC_USER_EVENTS_ON_STARTUP:true}
   cors:
     enabled: ${APP_CORS_ENABLED:true}
   services:
     project-url: ${PROJECT_SERVICE_URL:http://localhost:8083}
+  internal-api-key: ${APP_INTERNAL_API_KEY:}
   jwt:
     secret: ${JWT_SECRET:change-this-secret-in-real-projects-change-this-secret}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}

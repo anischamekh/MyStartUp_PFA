@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,7 @@ public class LeaveRequestController {
                     content = @Content(schema = @Schema(implementation = LeaveRequest.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
+    @PreAuthorize("hasAnyAuthority('HR','MANAGER','ADMIN')")
     public List<LeaveRequest> all() {
         return leaveRequestService.findAll();
     }
@@ -72,12 +74,14 @@ public class LeaveRequestController {
 
     @PostMapping("/{id}/approve")
     @Operation(summary = "Approve leave request", description = "Manager or HR only")
+    @PreAuthorize("hasAnyAuthority('MANAGER','HR')")
     public LeaveRequest approve(@PathVariable Long id) {
         return leaveRequestService.approve(id);
     }
 
     @PostMapping("/{id}/reject")
     @Operation(summary = "Reject leave request")
+    @PreAuthorize("hasAnyAuthority('MANAGER','HR')")
     public LeaveRequest reject(@PathVariable Long id) {
         return leaveRequestService.reject(id);
     }

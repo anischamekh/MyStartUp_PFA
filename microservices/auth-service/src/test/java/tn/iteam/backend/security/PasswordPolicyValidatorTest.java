@@ -1,9 +1,12 @@
 package tn.iteam.backend.security;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import tn.iteam.backend.exception.BusinessException;
 
 class PasswordPolicyValidatorTest {
@@ -16,7 +19,38 @@ class PasswordPolicyValidatorTest {
     }
 
     @Test
-    void rejectsWeakPassword() {
-        assertThrows(BusinessException.class, () -> validator.validate("weak"));
+    void rejectsNullOrTooShort() {
+        BusinessException ex = assertThrows(BusinessException.class, () -> validator.validate("Ab1!"));
+        assertEquals("Password must be at least 8 characters", ex.getMessage());
+    }
+
+    @Test
+    void rejectsMissingUppercase() {
+        BusinessException ex = assertThrows(BusinessException.class, () -> validator.validate("password1!"));
+        assertEquals("Password must contain an uppercase letter", ex.getMessage());
+    }
+
+    @Test
+    void rejectsMissingLowercase() {
+        BusinessException ex = assertThrows(BusinessException.class, () -> validator.validate("PASSWORD1!"));
+        assertEquals("Password must contain a lowercase letter", ex.getMessage());
+    }
+
+    @Test
+    void rejectsMissingDigit() {
+        BusinessException ex = assertThrows(BusinessException.class, () -> validator.validate("Password!"));
+        assertEquals("Password must contain a number", ex.getMessage());
+    }
+
+    @Test
+    void rejectsMissingSpecial() {
+        BusinessException ex = assertThrows(BusinessException.class, () -> validator.validate("Password1"));
+        assertEquals("Password must contain a special character", ex.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"weak", "12345678", "NoSpecial1", "noupper1!"})
+    void rejectsWeakPasswords(String password) {
+        assertThrows(BusinessException.class, () -> validator.validate(password));
     }
 }

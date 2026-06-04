@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +47,7 @@ public class EvaluationController {
     @PostMapping
     @Operation(summary = "Create evaluation")
     @ApiResponse(responseCode = "200", description = "Created")
+    @PreAuthorize("hasAnyAuthority('HR','MANAGER','TEAM_LEADER')")
     public Evaluation create(@RequestBody Evaluation evaluation) {
         return evaluationService.create(evaluation);
     }
@@ -53,6 +55,7 @@ public class EvaluationController {
     @PutMapping("/{id}")
     @Operation(summary = "Update evaluation")
     @ApiResponse(responseCode = "200", description = "Updated")
+    @PreAuthorize("hasAnyAuthority('HR','MANAGER','TEAM_LEADER')")
     public Evaluation update(@Parameter(example = "1") @PathVariable Long id, @RequestBody Evaluation evaluation) {
         return evaluationService.update(id, evaluation);
     }
@@ -60,6 +63,7 @@ public class EvaluationController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete evaluation")
     @ApiResponse(responseCode = "200", description = "Deleted")
+    @PreAuthorize("hasAnyAuthority('HR','MANAGER','TEAM_LEADER')")
     public ResponseEntity<?> delete(@Parameter(example = "1") @PathVariable Long id) {
         evaluationService.delete(id);
         return ResponseEntity.ok().build();

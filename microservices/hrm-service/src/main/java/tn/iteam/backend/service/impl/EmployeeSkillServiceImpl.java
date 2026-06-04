@@ -43,6 +43,10 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
 
     @Override
     public List<EmployeeSkill> findForUser(Long userId) {
+        JwtUserPrincipal me = currentUserProvider.requireCurrentUser();
+        if (!List.of("HR", "ADMIN").contains(me.role()) && !me.userId().equals(userId)) {
+            throw new BusinessException("Not allowed to view skills for other users");
+        }
         return enrich(employeeSkillRepository.findByUserId(userId));
     }
 

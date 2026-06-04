@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,14 +25,14 @@ import tn.iteam.backend.repository.TeamRepository;
 import tn.iteam.backend.repository.UserRepository;
 
 /**
- * Seeds demo users when {@code auth_db} has no users (matches {@code infra/postgres/seed/01-auth-minimal.sql}).
- * Default password for all accounts: {@code password}
+ * Seeds demo users when {@code auth_db} has no users. Disabled in {@code prod} profile.
+ * Password is supplied via {@code APP_SEED_PASSWORD} / {@code app.seed.password} (never logged).
  */
 @Component
+@Profile("!prod")
 public class AuthDataInitializer implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(AuthDataInitializer.class);
-    private static final String DEMO_PASSWORD = "password";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -39,6 +40,7 @@ public class AuthDataInitializer implements ApplicationRunner {
     private final EmployeeProfileRepository employeeProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final boolean seedEnabled;
+    private final String seedPassword;
 
     public AuthDataInitializer(
             UserRepository userRepository,
@@ -46,7 +48,8 @@ public class AuthDataInitializer implements ApplicationRunner {
             TeamRepository teamRepository,
             EmployeeProfileRepository employeeProfileRepository,
             PasswordEncoder passwordEncoder,
-            @Value("${app.seed.enabled:true}") boolean seedEnabled
+            @Value("${app.seed.enabled:false}") boolean seedEnabled,
+            @Value("${app.seed.password:}") String seedPassword
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -54,6 +57,7 @@ public class AuthDataInitializer implements ApplicationRunner {
         this.employeeProfileRepository = employeeProfileRepository;
         this.passwordEncoder = passwordEncoder;
         this.seedEnabled = seedEnabled;
+        this.seedPassword = seedPassword == null ? "" : seedPassword.trim();
     }
 
     @Override
@@ -62,11 +66,15 @@ public class AuthDataInitializer implements ApplicationRunner {
         if (!seedEnabled) {
             return;
         }
+        if (seedPassword.isEmpty()) {
+            log.warn("app.seed.enabled=true but app.seed.password is empty — skipping demo user seed");
+            return;
+        }
         if (userRepository.count() > 0) {
             return;
         }
 
-        log.info("auth_db has no users - seeding minimal accounts (password: {})", DEMO_PASSWORD);
+        log.info("auth_db has no users — seeding minimal demo accounts (password from app.seed.password)");
 
         Arrays.stream(RoleName.values()).forEach(this::ensureRole);
 
@@ -83,7 +91,7 @@ public class AuthDataInitializer implements ApplicationRunner {
 
         createProfile(employee, team, 25, "Developer", ExperienceLevel.MID, new BigDecimal("3200.00"));
 
-        log.info("Demo users ready: admin, hr, manager, employee - password '{}'", DEMO_PASSWORD);
+        log.info("Demo users ready: admin, hr, manager, employee");
     }
 
     private Role ensureRole(RoleName name) {
@@ -97,7 +105,7 @@ public class AuthDataInitializer implements ApplicationRunner {
     private User createUser(String username, String fullName, String email, RoleName roleName) {
         User user = new User();
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(DEMO_PASSWORD));
+        user.setPassword(passwordEncoder.encode(seedPassword));
         user.setFullName(fullName);
         user.setEmail(email);
         user.setRole(ensureRole(roleName));

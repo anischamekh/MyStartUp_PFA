@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,18 +44,21 @@ public class ProjectController {
 
     @PostMapping
     @Operation(summary = "Create project", description = "Manager only")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public Project create(@RequestBody Project project) {
         return projectService.create(project);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update project")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public Project update(@PathVariable Long id, @RequestBody Project project) {
         return projectService.update(id, project);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete project")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         projectService.delete(id);
         return ResponseEntity.noContent().build();

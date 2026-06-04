@@ -28,6 +28,7 @@ spring:
         spring.json.trusted.packages: "*"
 
 app:
+  internal-api-key: ${APP_INTERNAL_API_KEY:}
   cors:
     enabled: ${APP_CORS_ENABLED:true}
   jwt:

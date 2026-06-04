@@ -51,12 +51,23 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     @Override
     public List<LeaveRequest> findAll() {
+        JwtUserPrincipal me = currentUserProvider.requireCurrentUser();
+        if (!List.of("HR", "MANAGER", "ADMIN").contains(me.role())) {
+            throw new BusinessException("Not allowed to list all leave requests");
+        }
         return enrichAll(leaveRequestRepository.findAll());
     }
 
     @Override
     public LeaveRequest findById(Long id) {
-        return enrich(leaveRequestRepository.findById(id).orElseThrow(() -> new BusinessException("Leave request not found")));
+        LeaveRequest lr = leaveRequestRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Leave request not found"));
+        JwtUserPrincipal me = currentUserProvider.requireCurrentUser();
+        boolean privileged = List.of("HR", "MANAGER", "ADMIN").contains(me.role());
+        if (!privileged && !me.userId().equals(lr.getEmployeeId())) {
+            throw new BusinessException("Not allowed to view this leave request");
+        }
+        return enrich(lr);
     }
 
     @Override
@@ -199,6 +210,15 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     @Override
     public void delete(Long id) {
+        LeaveRequest lr = findById(id);
+        JwtUserPrincipal me = currentUserProvider.requireCurrentUser();
+        boolean privileged = List.of("HR", "MANAGER", "ADMIN").contains(me.role());
+        if (!privileged && !me.userId().equals(lr.getEmployeeId())) {
+            throw new BusinessException("Not allowed to delete this leave request");
+        }
+        if (!privileged && lr.getStatus() != LeaveStatus.PENDING) {
+            throw new BusinessException("Only pending leave requests can be deleted");
+        }
         leaveRequestRepository.deleteById(id);
     }
 

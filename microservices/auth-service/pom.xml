@@ -128,6 +128,21 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes combine.children="append">
+                        <!-- Legacy monolith stubs not exposed by auth-service REST API -->
+                        <exclude>tn/iteam/backend/service/impl/TaskServiceImpl*</exclude>
+                        <exclude>tn/iteam/backend/service/impl/ProjectServiceImpl*</exclude>
+                        <exclude>tn/iteam/backend/service/impl/PayrollServiceImpl*</exclude>
+                        <exclude>tn/iteam/backend/service/impl/TrainingServiceImpl*</exclude>
+                        <exclude>tn/iteam/backend/service/impl/EvaluationServiceImpl*</exclude>
+                        <exclude>tn/iteam/backend/service/impl/EmployeeSkillServiceImpl*</exclude>
+                        <exclude>tn/iteam/backend/service/impl/EmployeeDocumentServiceImpl*</exclude>
+                        <exclude>tn/iteam/backend/service/impl/NotificationServiceImpl*</exclude>
+                        <exclude>tn/iteam/backend/service/impl/ReportsServiceImpl*</exclude>
+                        <exclude>tn/iteam/backend/service/impl/LeaveRequestServiceImpl*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>report</id>

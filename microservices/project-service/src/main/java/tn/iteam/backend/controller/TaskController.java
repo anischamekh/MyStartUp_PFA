@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,12 +58,14 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "Created"),
             @ApiResponse(responseCode = "400", description = "Business rule violation")
     })
+    @PreAuthorize("hasAuthority('TEAM_LEADER')")
     public TaskResponse create(@RequestBody Task task) {
         return TaskMapper.toResponse(taskService.create(task));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update task")
+    @PreAuthorize("hasAuthority('TEAM_LEADER')")
     public TaskResponse update(@PathVariable Long id, @RequestBody Task task) {
         return TaskMapper.toResponse(taskService.update(id, task));
     }
@@ -76,12 +79,14 @@ public class TaskController {
 
     @PutMapping("/{id}/validate")
     @Operation(summary = "Validate task progress", description = "Team leader sets validated progress floor")
+    @PreAuthorize("hasAuthority('TEAM_LEADER')")
     public TaskResponse validate(@PathVariable Long id) {
         return TaskMapper.toResponse(taskService.validate(id));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete task")
+    @PreAuthorize("hasAuthority('TEAM_LEADER')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         taskService.delete(id);
         return ResponseEntity.noContent().build();

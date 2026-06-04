@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -123,6 +124,7 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Create user", description = "Password policy enforced")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Created user"), @ApiResponse(responseCode = "400", description = "Validation error")})
+    @PreAuthorize("hasAnyAuthority('HR','ADMIN')")
     public UserResponse create(@Valid @RequestBody CreateUserRequest request) {
         return userService.create(request);
     }
@@ -130,6 +132,7 @@ public class UserController {
     @PutMapping("/{id}")
     @Operation(summary = "Update user")
     @ApiResponse(responseCode = "200", description = "Updated user")
+    @PreAuthorize("hasAnyAuthority('HR','ADMIN')")
     public UserResponse update(@Parameter(example = "1") @PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
         return userService.update(id, request);
     }
@@ -137,6 +140,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete user", description = "Publishes Kafka UserDeletedEvent for HRM/Project cleanup")
     @ApiResponse(responseCode = "204", description = "Deleted")
+    @PreAuthorize("hasAnyAuthority('HR','ADMIN')")
     public ResponseEntity<Void> delete(@Parameter(example = "1") @PathVariable Long id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();

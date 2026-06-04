@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "project-service", url = "${app.services.project-url}")
+@FeignClient(name = "project-service", url = "${app.services.project-url}", configuration = ProjectServiceFeignConfig.class)
 public interface ProjectServiceClient {
 
     @GetMapping("/api/internal/users/{userId}/has-active-tasks")

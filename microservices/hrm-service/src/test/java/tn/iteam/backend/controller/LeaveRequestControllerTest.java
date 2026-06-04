@@ -27,9 +27,16 @@ class LeaveRequestControllerTest {
     private LeaveRequestService leaveRequestService;
 
     @Test
-    @WithMockUser
+    @WithMockUser(authorities = "HR")
     void listLeaves_returnsOk() throws Exception {
         when(leaveRequestService.findAll()).thenReturn(List.of());
         mockMvc.perform(get("/api/leaves")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    void mine_returnsOk() throws Exception {
+        when(leaveRequestService.findMine()).thenReturn(List.of());
+        mockMvc.perform(get("/api/leaves/mine")).andExpect(status().isOk());
     }
 }

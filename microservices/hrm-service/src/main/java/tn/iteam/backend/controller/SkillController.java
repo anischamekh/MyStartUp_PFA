@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +54,7 @@ public class SkillController {
     @PostMapping
     @Operation(summary = "Create skill", description = "HR only")
     @ApiResponse(responseCode = "200", description = "Created skill")
+    @PreAuthorize("hasAuthority('HR')")
     public Skill create(@RequestBody Skill skill) {
         return skillService.save(skill);
     }
@@ -60,6 +62,7 @@ public class SkillController {
     @PutMapping("/{id}")
     @Operation(summary = "Update skill", description = "HR only")
     @ApiResponse(responseCode = "200", description = "Updated skill")
+    @PreAuthorize("hasAuthority('HR')")
     public Skill update(
             @Parameter(description = "Skill id", example = "1") @PathVariable Long id,
             @RequestBody Skill skill) {
@@ -69,6 +72,7 @@ public class SkillController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete skill", description = "HR only")
     @ApiResponse(responseCode = "200", description = "Deleted")
+    @PreAuthorize("hasAuthority('HR')")
     public ResponseEntity<?> delete(@Parameter(description = "Skill id", example = "1") @PathVariable Long id) {
         skillService.delete(id);
         return ResponseEntity.ok().build();

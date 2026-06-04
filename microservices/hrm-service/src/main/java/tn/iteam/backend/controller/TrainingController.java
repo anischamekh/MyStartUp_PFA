@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -50,6 +51,7 @@ public class TrainingController {
     @PostMapping
     @Operation(summary = "Create training", description = "HR only")
     @ApiResponse(responseCode = "200", description = "Created")
+    @PreAuthorize("hasAuthority('HR')")
     public Training create(@RequestBody Training training) {
         return trainingService.save(training);
     }
@@ -57,6 +59,7 @@ public class TrainingController {
     @PutMapping("/{id}")
     @Operation(summary = "Update training")
     @ApiResponse(responseCode = "200", description = "Updated")
+    @PreAuthorize("hasAuthority('HR')")
     public Training update(@Parameter(example = "1") @PathVariable Long id, @RequestBody Training training) {
         return trainingService.update(id, training);
     }
@@ -64,6 +67,7 @@ public class TrainingController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete training")
     @ApiResponse(responseCode = "200", description = "Deleted")
+    @PreAuthorize("hasAuthority('HR')")
     public ResponseEntity<?> delete(@Parameter(example = "1") @PathVariable Long id) {
         trainingService.delete(id);
         return ResponseEntity.ok().build();

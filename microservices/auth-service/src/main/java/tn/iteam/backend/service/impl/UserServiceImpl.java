@@ -79,6 +79,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse create(CreateUserRequest request) {
+        requireHrOrAdmin();
         passwordPolicyValidator.validate(request.getPassword());
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new BusinessException("Username already exists");
@@ -136,6 +137,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse update(Long id, UpdateUserRequest request) {
+        requireHrOrAdmin();
         User existing = findById(id);
         existing.setFullName(request.getFullName().trim());
         existing.setEmail(request.getEmail().trim());
@@ -188,6 +190,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long id) {
+        requireHrOrAdmin();
         User user = findById(id);
         Long uid = user.getId();
 
@@ -205,6 +208,17 @@ public class UserServiceImpl implements UserService {
         userEventPublisher.publishUserDeleted(uid);
     }
 
+    private void requireHrOrAdmin() {
+        User creator = currentUserProvider.requireCurrentUser();
+        if (creator.getRole() == null) {
+            throw new BusinessException("Not allowed");
+        }
+        RoleName name = creator.getRole().getName();
+        if (name != RoleName.HR && name != RoleName.ADMIN) {
+            throw new BusinessException("Only HR or ADMIN can manage users");
+        }
+    }
+
     private void sendWelcomeEmailIfHr(User creator, User saved, String rawPassword) {
         try {
             if (creator.getRole() != null && creator.getRole().getName() == RoleName.HR) {
@@ -213,7 +227,7 @@ public class UserServiceImpl implements UserService {
                         + "Hello,\n\n"
                         + "Your account has been created successfully.\n\n"
                         + "Username: " + saved.getUsername() + "\n"
-                        + "Password: " + rawPassword + "\n\n"
+                        + "Use the password provided by HR during onboarding.\n\n"
                         + "You can login here:\n"
                         + "http://localhost:4200/login\n\n"
                         + "Welcome to the team!\n";

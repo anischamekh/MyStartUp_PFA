@@ -2,6 +2,7 @@ package tn.iteam.backend.controller;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,16 +55,19 @@ public class TeamController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('HR','ADMIN')")
     public Team create(@RequestBody Team team) {
         return teamService.create(team);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('HR','ADMIN')")
     public Team update(@PathVariable Long id, @RequestBody Team team) {
         return teamService.update(id, team);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('HR','ADMIN')")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         teamService.delete(id);
         return ResponseEntity.ok().build();
