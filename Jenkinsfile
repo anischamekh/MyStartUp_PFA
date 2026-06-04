@@ -31,10 +31,14 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarCloud') {
                     dir('microservices') {
+                        // Le token SONAR_TOKEN est automatiquement injecté par withSonarQubeEnv
+                        // Il ne faut PAS le passer en argument -Dsonar.token
+                        // Remplacer "votre-organisation" par votre nom d'organisation SonarCloud
                         sh '''
-                          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-                            -Dsonar.token=$SONAR_TOKEN \
-                            -Dsonar.coverage.jacoco.xmlReportPaths=common-lib/target/site/jacoco/jacoco.xml,auth-service/target/site/jacoco/jacoco.xml,hrm-service/target/site/jacoco/jacoco.xml,project-service/target/site/jacoco/jacoco.xml,chatbot-service/target/site/jacoco/jacoco.xml
+                            mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                              -Dsonar.organization=votre-organisation \
+                              -Dsonar.projectKey=anischamekh_MyStartUp_PFA \
+                              -Dsonar.coverage.jacoco.xmlReportPaths=common-lib/target/site/jacoco/jacoco.xml,auth-service/target/site/jacoco/jacoco.xml,hrm-service/target/site/jacoco/jacoco.xml,project-service/target/site/jacoco/jacoco.xml,chatbot-service/target/site/jacoco/jacoco.xml
                         '''
                     }
                 }
