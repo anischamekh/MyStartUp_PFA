@@ -31,9 +31,6 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarCloud') {
                     dir('microservices') {
-                        // Le token SONAR_TOKEN est automatiquement injecté par withSonarQubeEnv
-                        // Il ne faut PAS le passer en argument -Dsonar.token
-                        // Remplacer "votre-organisation" par votre nom d'organisation SonarCloud
                         sh '''
                             mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                               -Dsonar.organization=anischamekh \
@@ -66,6 +63,39 @@ pipeline {
                     docker push ${DOCKER_USER}/mystartup-${svc}:latest
                   done
                 '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            when {
+                branch 'main'
+            }
+
+            steps {
+
+                sh 'kubectl apply -f k8s/configmap.yaml'
+
+                sh 'kubectl apply -f k8s/secrets.yaml'
+
+                sh 'kubectl apply -f k8s/postgres-deployment.yaml'
+
+                sh 'kubectl apply -f k8s/redis-deployment.yaml'
+
+                sh 'kubectl apply -f k8s/zookeeper-deployment.yaml'
+
+                sh 'kubectl apply -f k8s/kafka-deployment.yaml'
+
+                sh 'kubectl apply -f k8s/auth-service-deployment.yaml'
+
+                sh 'kubectl apply -f k8s/hrm-service-deployment.yaml'
+
+                sh 'kubectl apply -f k8s/project-service-deployment.yaml'
+
+                sh 'kubectl apply -f k8s/chatbot-service-deployment.yaml'
+
+                sh 'kubectl apply -f k8s/api-gateway-deployment.yaml'
+
+                sh 'kubectl apply -f k8s/ingress.yaml'
             }
         }
     }
