@@ -2,8 +2,6 @@ package tn.iteam.common.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +15,7 @@ public class SharedJwtService {
     private final long refreshExpirationMs;
 
     public SharedJwtService(String secret, long expirationMs, long refreshExpirationMs) {
-        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.signingKey = JwtSigningKeys.hmacShaKey(secret);
         this.expirationMs = expirationMs;
         this.refreshExpirationMs = refreshExpirationMs;
     }

@@ -3,6 +3,7 @@ package tn.iteam.backend.security;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,7 +45,7 @@ class PasswordPolicyValidatorTest {
 
     @Test
     void rejectsMissingSpecial() {
-        BusinessException ex = assertThrows(BusinessException.class, () -> validator.validate("Password1"));
+        BusinessException ex = assertThrows(BusinessException.class, () -> validator.validate("SecurePass9"));
         assertEquals("Password must contain a special character", ex.getMessage());
     }
 
@@ -52,5 +53,23 @@ class PasswordPolicyValidatorTest {
     @ValueSource(strings = {"weak", "12345678", "NoSpecial1", "noupper1!"})
     void rejectsWeakPasswords(String password) {
         assertThrows(BusinessException.class, () -> validator.validate(password));
+    }
+
+    @Test
+    void rejectsCommonPassword() {
+        BusinessException ex = assertThrows(BusinessException.class, () -> validator.validate("password1"));
+        assertTrue(ex.getMessage().contains("common"));
+    }
+
+    @Test
+    void rejectsTooLongPassword() {
+        String longPassword = "Aa1!" + "x".repeat(130);
+        BusinessException ex = assertThrows(BusinessException.class, () -> validator.validate(longPassword));
+        assertTrue(ex.getMessage().contains("at most"));
+    }
+
+    @Test
+    void rejectsNullPassword() {
+        assertThrows(BusinessException.class, () -> validator.validate(null));
     }
 }

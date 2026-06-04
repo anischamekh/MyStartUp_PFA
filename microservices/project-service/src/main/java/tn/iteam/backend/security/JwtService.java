@@ -2,8 +2,7 @@ package tn.iteam.backend.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
+import tn.iteam.common.security.JwtSigningKeys;
 import java.util.Date;
 import java.util.Map;
 import javax.crypto.SecretKey;
@@ -21,7 +20,7 @@ public class JwtService {
             @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.expiration-ms}") long expirationMs
     ) {
-        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.signingKey = JwtSigningKeys.hmacShaKey(secret);
         this.expirationMs = expirationMs;
     }
 

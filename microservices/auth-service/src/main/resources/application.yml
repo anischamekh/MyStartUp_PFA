@@ -30,11 +30,12 @@ app:
     user-events-on-startup: ${APP_SYNC_USER_EVENTS_ON_STARTUP:true}
   cors:
     enabled: ${APP_CORS_ENABLED:true}
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:4200,http://127.0.0.1:4200}
   services:
     project-url: ${PROJECT_SERVICE_URL:http://localhost:8083}
   internal-api-key: ${APP_INTERNAL_API_KEY:}
   jwt:
-    secret: ${JWT_SECRET:change-this-secret-in-real-projects-change-this-secret}
+    secret: ${JWT_SECRET:change-this-secret-in-real-projects-change-this-secret-key-32}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
     refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
   cookie:
