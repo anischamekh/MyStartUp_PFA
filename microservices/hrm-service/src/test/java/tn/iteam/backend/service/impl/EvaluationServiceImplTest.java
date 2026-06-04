@@ -133,6 +133,63 @@ class EvaluationServiceImplTest {
     }
 
     @Test
+    void findVisible_managerSeesAll() {
+        when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(3L, "mgr", "MANAGER", "M"));
+        when(evaluationRepository.findAll()).thenReturn(List.of());
+        assertEquals(0, evaluationService.findVisible().size());
+    }
+
+    @Test
+    void findVisible_teamLeaderFiltersByTeam() {
+        when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(10L, "lead", "TEAM_LEADER", "L"));
+        Evaluation inTeam = new Evaluation();
+        inTeam.setEmployeeId(5L);
+        inTeam.setEvaluatorId(10L);
+        Evaluation outTeam = new Evaluation();
+        outTeam.setEmployeeId(99L);
+        outTeam.setEvaluatorId(10L);
+        when(evaluationRepository.findAll()).thenReturn(List.of(inTeam, outTeam));
+        when(authServiceClient.getTeams()).thenReturn(List.of(new TeamSummaryDto(7L, "T", 10L)));
+        UserSnapshot snap = new UserSnapshot();
+        snap.setTeamId(7L);
+        when(userSnapshotService.mapByIds(any())).thenReturn(Map.of(5L, snap));
+        when(userSnapshotService.findById(5L)).thenReturn(java.util.Optional.of(snap));
+        when(userSnapshotService.findById(99L)).thenReturn(java.util.Optional.empty());
+
+        assertEquals(1, evaluationService.findVisible().size());
+    }
+
+    @Test
+    void create_rejectsInvalidScore() {
+        when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(2L, "hr", "HR", "HR"));
+        Evaluation input = new Evaluation();
+        input.setEmployeeId(5L);
+        input.setScore(150);
+        input.setTechnicalSkill(70);
+        input.setTeamwork(70);
+        input.setDeadlineRespect(70);
+        when(userSnapshotService.requireById(5L)).thenReturn(new UserSnapshot());
+        assertThrows(BusinessException.class, () -> evaluationService.create(input));
+    }
+
+    @Test
+    void update_deniedForEmployee() {
+        when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(1L, "e", "EMPLOYEE", "E"));
+        Evaluation existing = new Evaluation();
+        existing.setId(1L);
+        existing.setEmployeeId(5L);
+        existing.setEvaluatorId(2L);
+        when(evaluationRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(userSnapshotService.mapByIds(any())).thenReturn(Map.of());
+        Evaluation patch = new Evaluation();
+        patch.setScore(90);
+        patch.setTechnicalSkill(80);
+        patch.setTeamwork(80);
+        patch.setDeadlineRespect(80);
+        assertThrows(BusinessException.class, () -> evaluationService.update(1L, patch));
+    }
+
+    @Test
     void create_employeeRoleRejected() {
         when(currentUserProvider.requireCurrentUser())
                 .thenReturn(new JwtUserPrincipal(1L, "e", "EMPLOYEE", "E"));

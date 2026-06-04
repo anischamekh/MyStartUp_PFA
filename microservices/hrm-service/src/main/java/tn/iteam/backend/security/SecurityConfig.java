@@ -31,6 +31,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         ApiSecuritySupport.configureApiCsrf(http);
+        ApiSecuritySupport.configureSecurityHeaders(http);
         ApiSecuritySupport.applyCors(http, corsProperties.isEnabled());
         http
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

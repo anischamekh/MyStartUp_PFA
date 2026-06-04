@@ -148,6 +148,36 @@ class LeaveRequestServiceImplTest {
     }
 
     @Test
+    void findById_employeeCanViewOwn() {
+        LeaveRequest lr = new LeaveRequest();
+        lr.setId(3L);
+        lr.setEmployeeId(1L);
+        when(leaveRequestRepository.findById(3L)).thenReturn(Optional.of(lr));
+        when(currentUserProvider.requireCurrentUser())
+                .thenReturn(new JwtUserPrincipal(1L, "john", "EMPLOYEE", "John"));
+
+        assertEquals(3L, service.findById(3L).getId());
+    }
+
+    @Test
+    void findForUser_hrCanList() {
+        when(currentUserProvider.requireCurrentUser())
+                .thenReturn(new JwtUserPrincipal(2L, "hr", "HR", "HR"));
+        when(leaveRequestRepository.findByEmployeeId(5L)).thenReturn(List.of());
+        assertEquals(0, service.findForUser(5L).size());
+    }
+
+    @Test
+    void request_rejectsInvalidDateRange() {
+        when(currentUserProvider.requireCurrentUser())
+                .thenReturn(new JwtUserPrincipal(5L, "emp", "EMPLOYEE", "Emp"));
+        LeaveRequest input = new LeaveRequest();
+        input.setStartDate(LocalDate.of(2026, 6, 10));
+        input.setEndDate(LocalDate.of(2026, 6, 1));
+        assertThrows(BusinessException.class, () -> service.request(input));
+    }
+
+    @Test
     void reject_managerSetsRejected() {
         when(currentUserProvider.requireCurrentUser())
                 .thenReturn(new JwtUserPrincipal(20L, "mgr", "HR", "HR User"));

@@ -1,5 +1,6 @@
 package tn.iteam.backend.security;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -14,6 +15,23 @@ class InternalApiKeyFilterTest {
     @Test
     void rejectsMissingApiKey() throws Exception {
         InternalApiKeyFilter filter = new InternalApiKeyFilter("secret-key");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/internal/users/1/has-active-tasks");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = mock(FilterChain.class);
+
+        filter.doFilterInternal(request, response, chain);
+        verify(chain, never()).doFilter(request, response);
+    }
+
+    @Test
+    void shouldNotFilter_nonInternalPaths() throws Exception {
+        InternalApiKeyFilter filter = new InternalApiKeyFilter("secret-key");
+        assertTrue(filter.shouldNotFilter(new MockHttpServletRequest("GET", "/api/tasks")));
+    }
+
+    @Test
+    void rejectsWhenExpectedKeyEmpty() throws Exception {
+        InternalApiKeyFilter filter = new InternalApiKeyFilter("");
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/internal/users/1/has-active-tasks");
         MockHttpServletResponse response = new MockHttpServletResponse();
         FilterChain chain = mock(FilterChain.class);

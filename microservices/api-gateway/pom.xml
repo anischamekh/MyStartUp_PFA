@@ -55,7 +55,7 @@
                 <configuration>
                     <excludes combine.children="append">
                         <exclude>tn/iteam/gateway/ApiGatewayApplication*</exclude>
-                        <exclude>tn/iteam/gateway/config/RateLimiterConfig*</exclude>
+                        <exclude>tn/iteam/gateway/config/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>

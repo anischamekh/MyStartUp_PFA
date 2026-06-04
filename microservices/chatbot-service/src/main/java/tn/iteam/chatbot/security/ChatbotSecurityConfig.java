@@ -22,6 +22,7 @@ public class ChatbotSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         ApiSecuritySupport.configureApiCsrf(http);
+        ApiSecuritySupport.configureSecurityHeaders(http);
         http
                 .cors(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
