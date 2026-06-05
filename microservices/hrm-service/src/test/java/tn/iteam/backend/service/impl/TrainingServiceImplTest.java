@@ -89,6 +89,38 @@ class TrainingServiceImplTest {
     }
 
     @Test
+    void findById_returnsTraining() {
+        Training training = new Training();
+        training.setId(4L);
+        when(trainingRepository.findById(4L)).thenReturn(Optional.of(training));
+        assertEquals(4L, trainingService.findById(4L).getId());
+    }
+
+    @Test
+    void update_hrPersistsChanges() {
+        when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(1L, "hr", "HR", "HR"));
+        Training existing = new Training();
+        existing.setId(5L);
+        existing.setTitle("Old");
+        when(trainingRepository.findById(5L)).thenReturn(Optional.of(existing));
+        when(trainingRepository.save(existing)).thenReturn(existing);
+
+        Training patch = new Training();
+        patch.setTitle("Updated");
+        patch.setDate(LocalDate.now());
+        assertEquals("Updated", trainingService.update(5L, patch).getTitle());
+    }
+
+    @Test
+    void addAttendance_rejectsDuplicate() {
+        when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(1L, "hr", "HR", "HR"));
+        when(trainingRepository.findById(2L)).thenReturn(Optional.of(new Training()));
+        when(trainingAttendanceRepository.findByTraining_IdAndUserId(2L, 5L))
+                .thenReturn(Optional.of(new TrainingAttendance()));
+        assertThrows(BusinessException.class, () -> trainingService.addAttendance(2L, 5L));
+    }
+
+    @Test
     void delete_hrRemovesTrainingAndAttendance() {
         when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(1L, "hr", "HR", "HR"));
         Training training = new Training();

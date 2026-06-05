@@ -119,6 +119,43 @@ class PayrollServiceImplTest {
     }
 
     @Test
+    void findForUser_hrCanViewOtherUser() {
+        when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(1L, "hr", "HR", "HR"));
+        when(payrollRepository.findByUserId(9L)).thenReturn(List.of());
+        assertEquals(0, payrollService.findForUser(9L).size());
+    }
+
+    @Test
+    void save_extractsUserIdFromUserMap() {
+        when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(1L, "hr", "HR", "HR"));
+        UserSnapshot snap = new UserSnapshot();
+        snap.setId(8L);
+        when(userSnapshotService.requireById(8L)).thenReturn(snap);
+        when(userSnapshotService.findById(8L)).thenReturn(Optional.of(snap));
+
+        Payroll input = new Payroll();
+        input.setUser(java.util.Map.of("id", 8));
+        input.setBaseSalary(BigDecimal.valueOf(500));
+        when(payrollRepository.save(any(Payroll.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Payroll saved = payrollService.save(input);
+        assertEquals(8L, saved.getUserId());
+    }
+
+    @Test
+    void save_rejectsMissingUserId() {
+        when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(1L, "hr", "HR", "HR"));
+        assertThrows(BusinessException.class, () -> payrollService.save(new Payroll()));
+    }
+
+    @Test
+    void findVisible_adminSeesAll() {
+        when(currentUserProvider.requireCurrentUser()).thenReturn(new JwtUserPrincipal(1L, "a", "ADMIN", "A"));
+        when(payrollRepository.findAll()).thenReturn(List.of());
+        assertEquals(0, payrollService.findVisible().size());
+    }
+
+    @Test
     void findById_deniedForOtherEmployee() {
         Payroll row = new Payroll();
         row.setId(1L);

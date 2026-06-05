@@ -22,4 +22,15 @@ class JwtSigningKeysTest {
     void hmacShaKey_rejectsBlank() {
         assertThrows(IllegalArgumentException.class, () -> JwtSigningKeys.hmacShaKey("  "));
     }
+
+    @Test
+    void hmacShaKey_rejectsNull() {
+        assertThrows(IllegalArgumentException.class, () -> JwtSigningKeys.hmacShaKey(null));
+    }
+
+    @Test
+    void hmacShaKey_acceptsBase64ProductionSecret() {
+        String secret = "9f3niTAR1XzzLrHfP/zTRT4dkU+Xp4ReMhdi1+xPYl8RK41jGRxhrc03uN3HC3tkzZPi5Wp9LtNQgxZaWr4+vA==";
+        assertNotNull(JwtSigningKeys.hmacShaKey(secret));
+    }
 }

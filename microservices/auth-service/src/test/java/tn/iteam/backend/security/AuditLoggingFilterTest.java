@@ -56,6 +56,19 @@ class AuditLoggingFilterTest {
     }
 
     @Test
+    void doFilterInternal_usesAnonymousWhenHeaderMissing() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("DELETE", "/api/teams/1");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        response.setStatus(204);
+        FilterChain chain = mock(FilterChain.class);
+
+        filter.doFilterInternal(request, response, chain);
+
+        verify(auditLogRepository).save(argThat((AuditLog audit) ->
+                audit.getUsername() == null && "DELETE".equals(audit.getAction())));
+    }
+
+    @Test
     void doFilterInternal_recordsFailureFor4xx() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/auth/login");
         MockHttpServletResponse response = new MockHttpServletResponse();

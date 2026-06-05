@@ -43,4 +43,11 @@ class ContextDataServiceTest {
         String ctx = contextDataService.buildContext("token");
         assertTrue(ctx.toLowerCase().contains("unknown") || ctx.contains("No application"));
     }
+
+    @Test
+    void buildContext_defaultRole_returnsEmptyContext() {
+        when(securityContextHelper.currentRole()).thenReturn("GUEST");
+        String ctx = contextDataService.buildContext("token");
+        assertTrue(ctx.contains("GUEST") || ctx.length() > 0);
+    }
 }

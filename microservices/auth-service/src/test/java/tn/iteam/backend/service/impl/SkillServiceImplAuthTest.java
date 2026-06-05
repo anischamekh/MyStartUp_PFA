@@ -101,4 +101,36 @@ class SkillServiceImplAuthTest {
         skillService.delete(3L);
         verify(skillRepository).deleteById(3L);
     }
+
+    @Test
+    void update_hrRenamesSkill() {
+        User hr = new User();
+        Role role = new Role();
+        role.setName(RoleName.HR);
+        hr.setRole(role);
+        when(currentUserProvider.requireCurrentUser()).thenReturn(hr);
+        Skill existing = new Skill();
+        existing.setId(2L);
+        existing.setName("Old");
+        when(skillRepository.findById(2L)).thenReturn(Optional.of(existing));
+        when(skillRepository.findByNameIgnoreCase("New")).thenReturn(Optional.empty());
+        when(skillRepository.save(existing)).thenReturn(existing);
+
+        Skill patch = new Skill();
+        patch.setName("New");
+        assertEquals("New", skillService.update(2L, patch).getName());
+    }
+
+    @Test
+    void save_rejectsDuplicateName() {
+        User hr = new User();
+        Role role = new Role();
+        role.setName(RoleName.HR);
+        hr.setRole(role);
+        when(currentUserProvider.requireCurrentUser()).thenReturn(hr);
+        Skill input = new Skill();
+        input.setName("Java");
+        when(skillRepository.findByNameIgnoreCase("Java")).thenReturn(Optional.of(new Skill()));
+        assertThrows(BusinessException.class, () -> skillService.save(input));
+    }
 }

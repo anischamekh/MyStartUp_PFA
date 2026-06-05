@@ -3,6 +3,7 @@ package tn.iteam.backend.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +21,7 @@ import org.mockito.quality.Strictness;
 import tn.iteam.backend.entity.EmployeeHrData;
 import tn.iteam.backend.entity.LeaveRequest;
 import tn.iteam.backend.entity.LeaveStatus;
+import tn.iteam.backend.entity.UserSnapshot;
 import tn.iteam.backend.exception.BusinessException;
 import tn.iteam.backend.messaging.EventPublisher;
 import tn.iteam.backend.repository.EmployeeHrDataRepository;
@@ -175,6 +177,102 @@ class LeaveRequestServiceImplTest {
         input.setStartDate(LocalDate.of(2026, 6, 10));
         input.setEndDate(LocalDate.of(2026, 6, 1));
         assertThrows(BusinessException.class, () -> service.request(input));
+    }
+
+    @Test
+    void request_notifiesManagerWhenSet() {
+        when(currentUserProvider.requireCurrentUser())
+                .thenReturn(new JwtUserPrincipal(5L, "emp", "EMPLOYEE", "Emp"));
+        LeaveRequest input = new LeaveRequest();
+        input.setStartDate(LocalDate.of(2026, 7, 1));
+        input.setEndDate(LocalDate.of(2026, 7, 2));
+        input.setManagerId(20L);
+
+        EmployeeHrData hrData = new EmployeeHrData();
+        hrData.setUserId(5L);
+        hrData.setRemainingLeaveDays(30);
+        when(employeeHrDataRepository.findById(5L)).thenReturn(Optional.of(hrData));
+
+        LeaveRequest saved = new LeaveRequest();
+        saved.setId(1L);
+        saved.setEmployeeId(5L);
+        saved.setManagerId(20L);
+        saved.setDays(2);
+        when(leaveRequestRepository.save(any(LeaveRequest.class))).thenReturn(saved);
+
+        UserSnapshot manager = new UserSnapshot();
+        manager.setFullName("Manager");
+        when(userSnapshotService.findById(20L)).thenReturn(Optional.of(manager));
+        when(userSnapshotService.mapByIds(any())).thenReturn(Map.of());
+
+        service.request(input);
+        verify(notificationHelper).notify(eq(20L), any(), org.mockito.ArgumentMatchers.contains("Leave requested"));
+    }
+
+    @Test
+    void request_rejectsInsufficientBalance() {
+        when(currentUserProvider.requireCurrentUser())
+                .thenReturn(new JwtUserPrincipal(5L, "emp", "EMPLOYEE", "Emp"));
+        LeaveRequest input = new LeaveRequest();
+        input.setStartDate(LocalDate.of(2026, 8, 1));
+        input.setEndDate(LocalDate.of(2026, 8, 10));
+
+        EmployeeHrData hrData = new EmployeeHrData();
+        hrData.setUserId(5L);
+        hrData.setRemainingLeaveDays(2);
+        when(employeeHrDataRepository.findById(5L)).thenReturn(Optional.of(hrData));
+
+        assertThrows(BusinessException.class, () -> service.request(input));
+    }
+
+    @Test
+    void approve_rejectsWhenBalanceWouldGoNegative() {
+        when(currentUserProvider.requireCurrentUser())
+                .thenReturn(new JwtUserPrincipal(20L, "mgr", "MANAGER", "Manager"));
+
+        LeaveRequest lr = new LeaveRequest();
+        lr.setId(8L);
+        lr.setEmployeeId(5L);
+        lr.setDays(20);
+        lr.setStatus(LeaveStatus.PENDING);
+        when(leaveRequestRepository.findById(8L)).thenReturn(Optional.of(lr));
+        when(userSnapshotService.mapByIds(any())).thenReturn(Map.of());
+
+        EmployeeHrData hrData = new EmployeeHrData();
+        hrData.setUserId(5L);
+        hrData.setRemainingLeaveDays(5);
+        when(employeeHrDataRepository.findById(5L)).thenReturn(Optional.of(hrData));
+
+        assertThrows(BusinessException.class, () -> service.approve(8L));
+    }
+
+    @Test
+    void delete_employeeCanDeleteOwnPending() {
+        LeaveRequest lr = new LeaveRequest();
+        lr.setId(11L);
+        lr.setEmployeeId(1L);
+        lr.setStatus(LeaveStatus.PENDING);
+        when(leaveRequestRepository.findById(11L)).thenReturn(Optional.of(lr));
+        when(currentUserProvider.requireCurrentUser())
+                .thenReturn(new JwtUserPrincipal(1L, "john", "EMPLOYEE", "John"));
+        when(userSnapshotService.mapByIds(any())).thenReturn(Map.of());
+
+        service.delete(11L);
+        verify(leaveRequestRepository).deleteById(11L);
+    }
+
+    @Test
+    void delete_employeeCannotDeleteApproved() {
+        LeaveRequest lr = new LeaveRequest();
+        lr.setId(12L);
+        lr.setEmployeeId(1L);
+        lr.setStatus(LeaveStatus.APPROVED);
+        when(leaveRequestRepository.findById(12L)).thenReturn(Optional.of(lr));
+        when(currentUserProvider.requireCurrentUser())
+                .thenReturn(new JwtUserPrincipal(1L, "john", "EMPLOYEE", "John"));
+        when(userSnapshotService.mapByIds(any())).thenReturn(Map.of());
+
+        assertThrows(BusinessException.class, () -> service.delete(12L));
     }
 
     @Test
